@@ -10,7 +10,6 @@ import javax.ws.rs.Produces;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.scribble.nbacb.models.NbacbPick;
 import com.scribble.nbacb.models.NbacbPrediction;
 import com.scribble.nbacb.service.CollegeBasketBallOddsService;
 

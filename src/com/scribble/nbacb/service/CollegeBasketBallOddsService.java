@@ -64,9 +64,13 @@ public class CollegeBasketBallOddsService {
 				setHomeLoses(homeTeam.getLoses());
 				setAwayWins(awayTeam.getWins());
 				setAwayLoses(awayTeam.getLoses());
-				setWestgateCurrentPointSpread((finalWestgate == null || finalWestgate.getCurrentPointSpreadHomeHandicap().equals("PK")) ? 0: Double.parseDouble(finalWestgate.getCurrentPointSpreadHomeHandicap()));
-				setWestgateOpeningPointSpread((finalWestgate == null || finalWestgate.getCurrentPointSpreadHomeHandicap().equals("PK")) ? 0: Double.parseDouble(finalWestgate.getOpeningPointSpreadHomeHandicap()));
-				setSonnyMoorePointSpread(awayTeam.getPowerRanking() - homeTeam.getPowerRanking() - 3.25);
+				
+				setWestgateCurrentPointSpread((finalWestgate == null || finalWestgate.getCurrentPointSpreadHomeHandicap() == null || finalWestgate.getCurrentPointSpreadHomeHandicap().equals("PK")) ? 0
+						: Double.parseDouble(finalWestgate.getCurrentPointSpreadHomeHandicap()));
+				setWestgateOpeningPointSpread((finalWestgate == null || finalWestgate.getOpeningPointSpreadHomeHandicap() == null || finalWestgate.getOpeningPointSpreadHomeHandicap().equals("PK")) ? 0
+						: Double.parseDouble(finalWestgate.getOpeningPointSpreadHomeHandicap()));
+				
+				setSonnyMoorePointSpread((Math.round((awayTeam.getPowerRanking() - homeTeam.getPowerRanking()) * 100.0) / 100.0) - 3.25);
 			}});
 		}
 		
@@ -101,6 +105,7 @@ public class CollegeBasketBallOddsService {
 		if (secondMatch.size() == 1)
 		{
 			System.out.println("MATCH : " + secondMatch.get(0).getTeamName());
+			return secondMatch.get(0);
 		}
 		else
 		{
