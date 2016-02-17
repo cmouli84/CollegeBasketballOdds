@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.scribble.nbacb.models.NbacbPick;
+import com.scribble.nbacb.models.NbacbPrediction;
 import com.scribble.nbacb.service.CollegeBasketBallOddsService;
 
 @Path("/nbacb")
@@ -22,7 +23,7 @@ public class CollegeBasketBallOddsController {
 	
 	@GET
 	@Produces("application/json")
-	public List<String> getCollegeBasketBallOdds() throws IOException
+	public List<NbacbPrediction> getCollegeBasketBallOdds() throws IOException
 	{
 		return nbacbService.getNbacbOdds();
 	}

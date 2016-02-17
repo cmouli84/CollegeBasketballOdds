@@ -49,6 +49,12 @@ public class CollegeBasketBallOddsRepository {
 		
 		List<NbacbPick> nbacbPicks = Arrays.asList(mapper.readValue(response.toString(), NbacbPick[].class));
 		
+		for (NbacbPick pick: nbacbPicks)
+		{
+			pick.setHomeTeamName(GetTeamName(pick.getHomeTeamName()));
+			pick.setAwayTeamName(GetTeamName(pick.getAwayTeamName()));
+		}
+		
 		return nbacbPicks;
 	}
 	
@@ -103,11 +109,9 @@ public class CollegeBasketBallOddsRepository {
 					inputLine = inputLine.substring(firstIndexOfSpace).trim();
 					double powerRanking = Double.parseDouble(inputLine);
 					
-					System.out.println(teamName);
-					
 					powerRankings.add(new PowerRanking()
 							{{
-								setTeamName(teamName);
+								setTeamName(GetTeamName(teamName));
 								setWins(wins);
 								setLoses(loses);
 								setTies(ties);
@@ -128,6 +132,18 @@ public class CollegeBasketBallOddsRepository {
 		System.out.println("Power Ranking Count " + powerRankings.size());
 		
 		return powerRankings;
+	}
+	
+	private String GetTeamName(String teamName)
+	{
+		String formattedTeamName = teamName.trim().toUpperCase().replace('-', ' ');
+		if (formattedTeamName.startsWith("ST."))
+		{
+			formattedTeamName = formattedTeamName.replace((CharSequence)"ST.", (CharSequence)"SAINT");
+		}
+		formattedTeamName = formattedTeamName.replace((CharSequence)"ST.", (CharSequence)"STATE");
+		
+		return formattedTeamName;
 	}
 	
 }

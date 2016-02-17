@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.scribble.nbacb.models.NbacbPick;
+import com.scribble.nbacb.models.NbacbPrediction;
+import com.scribble.nbacb.models.Odd;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.repository.CollegeBasketBallOddsRepository;
 
@@ -17,92 +19,151 @@ public class CollegeBasketBallOddsService {
 	@Autowired
 	private CollegeBasketBallOddsRepository nbacbRepository;
 
-	public List<String> getNbacbOdds() throws IOException
+	public List<NbacbPrediction> getNbacbOdds() throws IOException
 	{
+		List<NbacbPrediction> nbacbPredictions = new ArrayList<NbacbPrediction>();
+		
 		List<NbacbPick> nbacbOdds = nbacbRepository.getNbacbOdds();
 	
 		List<PowerRanking> sonnyMoorePowerRanking = nbacbRepository.getSonnyMoorePowerRaking();
 
-		ArrayList<String> teamNames = new ArrayList<String>(); 
-		
 		for (NbacbPick pick : nbacbOdds)
 		{
-			getMatchingTeamName(sonnyMoorePowerRanking, pick.getHomeTeamName(), pick.getHomeWins(), pick.getHomeLosses());
+			PowerRanking homeTeam = getMatchingTeamName(sonnyMoorePowerRanking, pick.getHomeTeamName(), pick.getHomeWins(), pick.getHomeLosses());
 
-			getMatchingTeamName(sonnyMoorePowerRanking, pick.getAwayTeamName(), pick.getAwayWins(), pick.getAwayLosses());
+			PowerRanking awayTeam = getMatchingTeamName(sonnyMoorePowerRanking, pick.getAwayTeamName(), pick.getAwayWins(), pick.getAwayLosses());
 			
-			teamNames.add(pick.getHomeTeamName());
-			teamNames.add(pick.getAwayTeamName());
+			if (homeTeam == null || awayTeam == null)
+			{
+				nbacbPredictions.add(new NbacbPrediction(){{
+					setHomeTeamName(pick.getHomeTeamName());
+					setAwayTeamName(pick.getAwayTeamName());
+				}});
+				continue;
+			}
+			
+			Odd westgate = null;
+			for(Odd odd: pick.getOdds())
+			{
+				if (odd.getSportsbookName().toUpperCase().trim().equals("WESTGATE"))
+				{
+					westgate = odd;
+					if (westgate.getCurrentPointSpreadHomeHandicap() == null)
+					{
+						westgate.setCurrentPointSpreadHomeHandicap(westgate.getOpeningPointSpreadHomeHandicap());
+					}
+					break;
+				}
+			}
+			final Odd finalWestgate = westgate;
+						
+			nbacbPredictions.add(new NbacbPrediction(){{
+				setHomeTeamName(pick.getHomeTeamName());
+				setAwayTeamName(pick.getAwayTeamName());
+				setHomeWins(homeTeam.getWins());
+				setHomeLoses(homeTeam.getLoses());
+				setAwayWins(awayTeam.getWins());
+				setAwayLoses(awayTeam.getLoses());
+				setWestgateCurrentPointSpread((finalWestgate == null || finalWestgate.getCurrentPointSpreadHomeHandicap().equals("PK")) ? 0: Double.parseDouble(finalWestgate.getCurrentPointSpreadHomeHandicap()));
+				setWestgateOpeningPointSpread((finalWestgate == null || finalWestgate.getCurrentPointSpreadHomeHandicap().equals("PK")) ? 0: Double.parseDouble(finalWestgate.getOpeningPointSpreadHomeHandicap()));
+				setSonnyMoorePointSpread(awayTeam.getPowerRanking() - homeTeam.getPowerRanking() - 3.25);
+			}});
 		}
 		
-		return teamNames;
+		return nbacbPredictions;
 	}
 
-	private void getMatchingTeamName(List<PowerRanking> sonnyMoorePowerRanking, String teamName, Long wins, Long loses) {
-		ArrayList<String> matches;
-		ArrayList<String> secondMatch;
-		Boolean matchFound;
+	private PowerRanking getMatchingTeamName(List<PowerRanking> sonnyMoorePowerRanking, String teamName, Long wins, Long loses) {
+		ArrayList<PowerRanking> matches = new ArrayList<PowerRanking>();
+		ArrayList<PowerRanking> secondMatch = new ArrayList<PowerRanking>();
 		System.out.println("TeamName : " + teamName);
-		matches = new ArrayList<String>();
-		secondMatch = new ArrayList<String>();
-		matchFound = false;
 		
 		for (PowerRanking powerRanking : sonnyMoorePowerRanking)
 		{
-			if (teamName.trim().toUpperCase().equals(powerRanking.getTeamName().trim().toUpperCase()))
+			if (teamName.equals(powerRanking.getTeamName()))
 			{
 				System.out.println("MATCH : " + powerRanking.getTeamName());
-				matchFound = true;
-				break;
+				return powerRanking;
 			}
 
-			if (powerRanking.getTeamName().trim().replace('-', ' ').toUpperCase()
-					.startsWith(teamName.trim().replace('-', ' ').toUpperCase()))
+			if (powerRanking.getTeamName().startsWith(teamName))
 			{
-				secondMatch.add(powerRanking.getTeamName());
+				secondMatch.add(powerRanking);
 			}
 
 			if (wins == powerRanking.getWins().longValue() 
 					|| loses == powerRanking.getLoses().longValue())
 			{
-				matches.add(powerRanking.getTeamName());
+				matches.add(powerRanking);
 			}
 		}
 
-		if (!matchFound)
+		if (secondMatch.size() == 1)
 		{
-			if (secondMatch.size() == 1)
+			System.out.println("MATCH : " + secondMatch.get(0).getTeamName());
+		}
+		else
+		{
+			PowerRanking matchTeam = TryFindMatch(teamName, matches, "HC");
+			if (matchTeam != null)
 			{
-				System.out.println("MATCH : " + secondMatch.get(0));
+				System.out.println(matchTeam.getTeamName());
+				return matchTeam;
 			}
 			else
 			{
-				String matchName = TryFindMatch(teamName, matches, "FW");
-				if (!matchName.equals(""))
+				for (PowerRanking team: matches)
 				{
-					System.out.println(matchName);
-				}
-				else
-				{
-					for (String team: matches)
-					{
-						System.out.println(team);
-					}
+					System.out.println(team.getTeamName());
 				}
 			}
 		}
+		
+		return null;
 	}
 	
-	private String TryFindMatch(String teamName, ArrayList<String> matches, String pattern)
+	private PowerRanking TryFindMatch(String teamName, ArrayList<PowerRanking> matches, String pattern)
 	{
-		teamName = teamName.replace('-', ' ').trim().toUpperCase();
-		ArrayList<String> secondMatch = new ArrayList<String>();
+		ArrayList<PowerRanking> secondMatch = new ArrayList<>();
+		if (pattern.equals("HC"))
+		{
+			String matchingTeamName = "";
+			switch (teamName)
+			{
+				case "UNLV":
+					matchingTeamName = "NEVADA LAS VEGAS";
+					break;
+				case "TEXAS CHRISTIAN":
+					matchingTeamName = "TCU";
+					break;
+				case "INDIANA   PURDUE":
+					matchingTeamName = "IUPUI";
+					break;
+				case "SOUTHERN CALIFORNIA":
+					matchingTeamName = "SOUTHERN CAL";
+					break;
+				case "LOUISIANA STATE":
+					matchingTeamName = "LSU";
+					break;
+				case "LOYOLA CHICAGO":
+					matchingTeamName = "LOYOLA ILLINOIS";
+					break;
+			}
+			
+			for (PowerRanking team : matches)
+			{
+				if (team.getTeamName().equals(matchingTeamName))
+				{
+					return team;
+				}
+			}
+			return TryFindMatch(teamName, matches, "FW");
+		}
 		if (pattern.equals("FW"))
 		{
-			for (String matchName: matches)
+			for (PowerRanking matchName: matches)
 			{
-				if (matchName.trim().toUpperCase().replace('-', ' ').split(" ")[0]
-						.equals(teamName.split(" ")[0]))
+				if (matchName.getTeamName().split(" ")[0].equals(teamName.split(" ")[0]))
 				{
 					secondMatch.add(matchName);
 				}
@@ -116,9 +177,9 @@ public class CollegeBasketBallOddsService {
 		}
 		if (pattern.equals("LW"))
 		{
-			for (String matchName: matches)
+			for (PowerRanking matchName: matches)
 			{
-				String[] matchArray = matchName.trim().toUpperCase().replace('-', ' ').split(" ");
+				String[] matchArray = matchName.getTeamName().split(" ");
 				String[] teamNameArray = teamName.split(" ");
 				if (matchArray[matchArray.length - 1].equals(teamNameArray[teamNameArray.length - 1]))
 				{
@@ -132,7 +193,6 @@ public class CollegeBasketBallOddsService {
 			}
 		}
 		
-		
-		return "";
+		return null;
 	}
 }
