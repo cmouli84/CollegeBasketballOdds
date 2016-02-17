@@ -70,7 +70,7 @@ public class CollegeBasketBallOddsService {
 				setWestgateOpeningPointSpread((finalWestgate == null || finalWestgate.getOpeningPointSpreadHomeHandicap() == null || finalWestgate.getOpeningPointSpreadHomeHandicap().equals("PK")) ? 0
 						: Double.parseDouble(finalWestgate.getOpeningPointSpreadHomeHandicap()));
 				
-				setSonnyMoorePointSpread((Math.round((awayTeam.getPowerRanking() - homeTeam.getPowerRanking()) * 100.0) / 100.0) - 3.25);
+				setSonnyMoorePointSpread((Math.round((awayTeam.getPowerRanking() - homeTeam.getPowerRanking() - 3.25) * 100.0) / 100.0));
 			}});
 		}
 		
