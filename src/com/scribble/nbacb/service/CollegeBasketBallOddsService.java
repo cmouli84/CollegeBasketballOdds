@@ -153,6 +153,15 @@ public class CollegeBasketBallOddsService {
 				case "LOYOLA CHICAGO":
 					matchingTeamName = "LOYOLA ILLINOIS";
 					break;
+				case "BRIGHAM YOUNG":
+					matchingTeamName = "BYU";
+					break;
+				case "CAL POLY SLO":
+					matchingTeamName = "CAL POLY";
+					break;
+				case "SOUTHERN METHODIST":
+					matchingTeamName = "SMU";
+					break;
 			}
 			
 			for (PowerRanking team : matches)

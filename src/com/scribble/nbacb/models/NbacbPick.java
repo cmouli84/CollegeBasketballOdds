@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 @Generated("org.jsonschema2pojo")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NbacbPick {
 
     private Long pickId;
@@ -18,6 +21,7 @@ public class NbacbPick {
     private String gameStartDt;
     private String homeTeamName;
     private String awayTeamName;
+    private String seoName;
     private String homeTeamNickName;
     private String awayTeamNickName;
     private String handicap;
@@ -2396,6 +2400,14 @@ public class NbacbPick {
 	 */
 	public void setAwayDivision(String awayDivision) {
 		this.awayDivision = awayDivision;
+	}
+
+	public String getSeoName() {
+		return seoName;
+	}
+
+	public void setSeoName(String seoName) {
+		this.seoName = seoName;
 	}
 
 }

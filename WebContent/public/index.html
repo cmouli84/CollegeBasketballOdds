@@ -1,0 +1,41 @@
+<html ng-app="App">
+<head>
+  <meta charset="utf-8">
+  <title>College Basket Ball Odds</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://bootswatch.com/cosmo/bootstrap.min.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.js"></script>
+  <script type="text/javascript">
+    var App = angular.module('App', []);
+
+    App.controller('NbacbCtrl', function($scope, $http) {
+      $http.get('/api/nbacb')
+           .then(function(res){
+              $scope.picks = res.data;                
+            });
+    });
+  </script>
+</head>
+<body>
+  <div class="container" ng-controller="NbacbCtrl">
+    <table class="table table-striped col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <thead>
+      	<tr>
+          <th class="col-lg-3 col-md-3 col-sm-3 col-xs-3">Match</th>
+          <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Home Team<br>Wins/Loses</th>
+          <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Away Team<br>Wins/Loses</th>
+          <th class="col-lg-3 col-md-3 col-sm-3 col-xs-3">Westgate Odds<br>Current/Opening</th>
+          <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Sonny Moore Odds</th>
+        </tr>
+      </thead>
+      <tr ng-repeat="pick in picks">
+        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">{{pick.awayTeamName}}<br>@{{pick.homeTeamName}}</td>
+        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{pick.homeWins}}/{{pick.homeLoses}}</td>
+        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{pick.awayWins}}/{{pick.awayLoses}}</td>
+        <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3">{{pick.westgateCurrentPointSpread}}/{{pick.westgateOpeningPointSpread}}</td>
+        <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">{{pick.sonnyMoorePointSpread}}</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
