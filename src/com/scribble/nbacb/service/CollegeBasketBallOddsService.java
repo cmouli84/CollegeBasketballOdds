@@ -25,7 +25,7 @@ public class CollegeBasketBallOddsService {
 		
 		List<NbacbPick> nbacbOdds = nbacbRepository.getNbacbOdds();
 	
-		List<PowerRanking> sonnyMoorePowerRanking = nbacbRepository.getSonnyMoorePowerRaking();
+		ArrayList<PowerRanking> sonnyMoorePowerRanking = nbacbRepository.getSonnyMoorePowerRaking();
 
 		for (NbacbPick pick : nbacbOdds)
 		{
@@ -77,7 +77,7 @@ public class CollegeBasketBallOddsService {
 		return nbacbPredictions;
 	}
 
-	private PowerRanking getMatchingTeamName(List<PowerRanking> sonnyMoorePowerRanking, String teamName, Long wins, Long loses) {
+	private PowerRanking getMatchingTeamName(ArrayList<PowerRanking> sonnyMoorePowerRanking, String teamName, Long wins, Long loses) {
 		ArrayList<PowerRanking> matches = new ArrayList<PowerRanking>();
 		ArrayList<PowerRanking> secondMatch = new ArrayList<PowerRanking>();
 		System.out.println("TeamName : " + teamName);
@@ -101,6 +101,13 @@ public class CollegeBasketBallOddsService {
 				matches.add(powerRanking);
 			}
 		}
+		
+		PowerRanking hardMatch = TryFindMatch(teamName, sonnyMoorePowerRanking, "HC");
+		if (hardMatch != null)
+		{
+			System.out.println(hardMatch.getTeamName());
+			return hardMatch;
+		}
 
 		if (secondMatch.size() == 1)
 		{
@@ -109,7 +116,7 @@ public class CollegeBasketBallOddsService {
 		}
 		else
 		{
-			PowerRanking matchTeam = TryFindMatch(teamName, matches, "HC");
+			PowerRanking matchTeam = TryFindMatch(teamName, matches, "FW");
 			if (matchTeam != null)
 			{
 				System.out.println(matchTeam.getTeamName());
@@ -162,6 +169,9 @@ public class CollegeBasketBallOddsService {
 				case "SOUTHERN METHODIST":
 					matchingTeamName = "SMU";
 					break;
+				case "CHARLESTON":
+					matchingTeamName = "COLLEGE OF CHARLESTON";
+					break;
 			}
 			
 			for (PowerRanking team : matches)
@@ -171,7 +181,7 @@ public class CollegeBasketBallOddsService {
 					return team;
 				}
 			}
-			return TryFindMatch(teamName, matches, "FW");
+			return null;
 		}
 		if (pattern.equals("FW"))
 		{

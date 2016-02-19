@@ -58,7 +58,7 @@ public class CollegeBasketBallOddsRepository {
 		return nbacbPicks;
 	}
 	
-	public List<PowerRanking> getSonnyMoorePowerRaking() throws MalformedURLException, IOException
+	public ArrayList<PowerRanking> getSonnyMoorePowerRaking() throws MalformedURLException, IOException
 	{
 		String url = "http://sonnymoorepowerratings.com/m-basket.htm";
 		
@@ -76,7 +76,7 @@ public class CollegeBasketBallOddsRepository {
 		String content;
 		StringBuffer response = new StringBuffer();
 
-		List<PowerRanking> powerRankings = new ArrayList<PowerRanking>();
+		ArrayList<PowerRanking> powerRankings = new ArrayList<PowerRanking>();
 		Boolean contentStarted = false;
 		while ((content = in.readLine()) != null) {
 			response.append(content);
