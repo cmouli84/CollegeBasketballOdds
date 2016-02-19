@@ -11,6 +11,7 @@ public class NbacbPrediction {
 	private Double westgateCurrentPointSpread;
 	private Double westgateOpeningPointSpread;
 	private Double sonnyMoorePointSpread;
+	private String gameDate;
 	/**
 	 * @return the homeTeamName
 	 */
@@ -118,6 +119,18 @@ public class NbacbPrediction {
 	 */
 	public void setSonnyMoorePointSpread(Double sonnyMoorePointSpread) {
 		this.sonnyMoorePointSpread = sonnyMoorePointSpread;
+	}
+	/**
+	 * @return the gameDate
+	 */
+	public String getGameDate() {
+		return gameDate;
+	}
+	/**
+	 * @param gameDate the gameDate to set
+	 */
+	public void setGameDate(String gameDate) {
+		this.gameDate = gameDate;
 	}
 	
 }

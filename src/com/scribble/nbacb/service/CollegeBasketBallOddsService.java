@@ -60,6 +60,7 @@ public class CollegeBasketBallOddsService {
 			nbacbPredictions.add(new NbacbPrediction(){{
 				setHomeTeamName(pick.getHomeTeamName());
 				setAwayTeamName(pick.getAwayTeamName());
+				setGameDate(pick.getGamedate().toUpperCase());
 				setHomeWins(homeTeam.getWins());
 				setHomeLoses(homeTeam.getLoses());
 				setAwayWins(awayTeam.getWins());
