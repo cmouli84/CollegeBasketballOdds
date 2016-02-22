@@ -11,6 +11,7 @@ import com.scribble.nbacb.models.NbacbPick;
 import com.scribble.nbacb.models.NbacbPrediction;
 import com.scribble.nbacb.models.Odd;
 import com.scribble.nbacb.models.PowerRanking;
+import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.repository.CollegeBasketBallOddsRepository;
 
 @Service
@@ -78,6 +79,11 @@ public class CollegeBasketBallOddsService {
 		return nbacbPredictions;
 	}
 
+	public List<Event> getMatchesByDate(String matchDate) throws IOException
+	{
+		return nbacbRepository.getMatchesByDate(matchDate);
+	}
+	
 	private PowerRanking getMatchingTeamName(ArrayList<PowerRanking> sonnyMoorePowerRanking, String teamName, Long wins, Long loses) {
 		ArrayList<PowerRanking> matches = new ArrayList<PowerRanking>();
 		ArrayList<PowerRanking> secondMatch = new ArrayList<PowerRanking>();
