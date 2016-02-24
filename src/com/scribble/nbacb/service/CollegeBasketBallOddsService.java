@@ -1,15 +1,18 @@
 package com.scribble.nbacb.service;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.scribble.nbacb.models.NbacbPick;
 import com.scribble.nbacb.models.NbacbPrediction;
-import com.scribble.nbacb.models.Odd;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.repository.CollegeBasketBallOddsRepository;
@@ -20,73 +23,35 @@ public class CollegeBasketBallOddsService {
 	@Autowired
 	private CollegeBasketBallOddsRepository nbacbRepository;
 
-	public List<NbacbPrediction> getNbacbOdds() throws IOException
+	public List<NbacbPrediction> getMatchesByDate(Date matchDate) throws IOException, ParseException
 	{
-		List<NbacbPrediction> nbacbPredictions = new ArrayList<NbacbPrediction>();
+		List<NbacbPrediction> nbacbPredictions = new ArrayList<>();
 		
-		List<NbacbPick> nbacbOdds = nbacbRepository.getNbacbOdds();
-	
-		ArrayList<PowerRanking> sonnyMoorePowerRanking = nbacbRepository.getSonnyMoorePowerRaking();
-
-		for (NbacbPick pick : nbacbOdds)
+		List<Event> events = nbacbRepository.getEventsByDate(matchDate); 
+		
+		for (Event event: events)
 		{
-			PowerRanking homeTeam = getMatchingTeamName(sonnyMoorePowerRanking, pick.getHomeTeamName(), pick.getHomeWins(), pick.getHomeLosses());
-
-			PowerRanking awayTeam = getMatchingTeamName(sonnyMoorePowerRanking, pick.getAwayTeamName(), pick.getAwayWins(), pick.getAwayLosses());
+			DateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+			Date eventDate = format.parse(event.getGame_date());
 			
-			if (homeTeam == null || awayTeam == null)
+			if (!new SimpleDateFormat("yyyy-MM-dd z").format(matchDate).equals(new SimpleDateFormat("yyyy-MM-dd z").format(eventDate)))
 			{
-				nbacbPredictions.add(new NbacbPrediction(){{
-					setHomeTeamName(pick.getHomeTeamName());
-					setAwayTeamName(pick.getAwayTeamName());
-				}});
 				continue;
 			}
-			
-			Odd westgate = null;
-			for(Odd odd: pick.getOdds())
-			{
-				if (odd.getSportsbookName().toUpperCase().trim().equals("WESTGATE"))
-				{
-					westgate = odd;
-					if (westgate.getCurrentPointSpreadHomeHandicap() == null)
-					{
-						westgate.setCurrentPointSpreadHomeHandicap(westgate.getOpeningPointSpreadHomeHandicap());
-					}
-					break;
-				}
-			}
-			final Odd finalWestgate = westgate;
-						
-			nbacbPredictions.add(new NbacbPrediction(){{
-				setHomeTeamName(pick.getHomeTeamName());
-				setAwayTeamName(pick.getAwayTeamName());
-				setGameDate(pick.getGamedate().toUpperCase());
-				setHomeWins(homeTeam.getWins());
-				setHomeLoses(homeTeam.getLoses());
-				setAwayWins(awayTeam.getWins());
-				setAwayLoses(awayTeam.getLoses());
-				
-				setWestgateCurrentPointSpread((finalWestgate == null || finalWestgate.getCurrentPointSpreadHomeHandicap() == null || finalWestgate.getCurrentPointSpreadHomeHandicap().equals("PK")) ? 0
-						: Double.parseDouble(finalWestgate.getCurrentPointSpreadHomeHandicap()));
-				setWestgateOpeningPointSpread((finalWestgate == null || finalWestgate.getOpeningPointSpreadHomeHandicap() == null || finalWestgate.getOpeningPointSpreadHomeHandicap().equals("PK")) ? 0
-						: Double.parseDouble(finalWestgate.getOpeningPointSpreadHomeHandicap()));
-				
-				setSonnyMoorePointSpread((Math.round((awayTeam.getPowerRanking() - homeTeam.getPowerRanking() - 3.25) * 100.0) / 100.0));
+
+			nbacbPredictions.add(new NbacbPrediction() {{
+				setHomeTeamName(event.getHome_team().getFull_name());
+				setAwayTeamName(event.getAway_team().getFull_name());
+				setGameDate(new SimpleDateFormat("EEE MM/dd hh:mm a z").format(eventDate));
+				setWestgateCurrentPointSpread(event.getOdd() == null || event.getOdd().getHome_odd().startsWith("T")  || event.getOdd().getHome_odd().startsWith("pk") 
+						? 0 : Double.parseDouble(event.getOdd().getHome_odd()));
 			}});
 		}
 		
 		return nbacbPredictions;
 	}
-
-	public List<Event> getMatchesByDate(String matchDate) throws IOException
-	{
-		return nbacbRepository.getMatchesByDate(matchDate);
-	}
 	
-	private PowerRanking getMatchingTeamName(ArrayList<PowerRanking> sonnyMoorePowerRanking, String teamName, Long wins, Long loses) {
-		ArrayList<PowerRanking> matches = new ArrayList<PowerRanking>();
-		ArrayList<PowerRanking> secondMatch = new ArrayList<PowerRanking>();
+	private PowerRanking getMatchingTeamName(List<PowerRanking> sonnyMoorePowerRanking, String teamName, Long wins, Long loses) {
 		System.out.println("TeamName : " + teamName);
 		
 		for (PowerRanking powerRanking : sonnyMoorePowerRanking)
@@ -96,134 +61,9 @@ public class CollegeBasketBallOddsService {
 				System.out.println("MATCH : " + powerRanking.getTeamName());
 				return powerRanking;
 			}
-
-			if (powerRanking.getTeamName().startsWith(teamName))
-			{
-				secondMatch.add(powerRanking);
-			}
-
-			if (wins == powerRanking.getWins().longValue() 
-					|| loses == powerRanking.getLoses().longValue())
-			{
-				matches.add(powerRanking);
-			}
-		}
-		
-		PowerRanking hardMatch = TryFindMatch(teamName, sonnyMoorePowerRanking, "HC");
-		if (hardMatch != null)
-		{
-			System.out.println(hardMatch.getTeamName());
-			return hardMatch;
-		}
-
-		if (secondMatch.size() == 1)
-		{
-			System.out.println("MATCH : " + secondMatch.get(0).getTeamName());
-			return secondMatch.get(0);
-		}
-		else
-		{
-			PowerRanking matchTeam = TryFindMatch(teamName, matches, "FW");
-			if (matchTeam != null)
-			{
-				System.out.println(matchTeam.getTeamName());
-				return matchTeam;
-			}
-			else
-			{
-				for (PowerRanking team: matches)
-				{
-					System.out.println(team.getTeamName());
-				}
-			}
 		}
 		
 		return null;
 	}
 	
-	private PowerRanking TryFindMatch(String teamName, ArrayList<PowerRanking> matches, String pattern)
-	{
-		ArrayList<PowerRanking> secondMatch = new ArrayList<>();
-		if (pattern.equals("HC"))
-		{
-			String matchingTeamName = "";
-			switch (teamName)
-			{
-				case "UNLV":
-					matchingTeamName = "NEVADA LAS VEGAS";
-					break;
-				case "TEXAS CHRISTIAN":
-					matchingTeamName = "TCU";
-					break;
-				case "INDIANA   PURDUE":
-					matchingTeamName = "IUPUI";
-					break;
-				case "SOUTHERN CALIFORNIA":
-					matchingTeamName = "SOUTHERN CAL";
-					break;
-				case "LOUISIANA STATE":
-					matchingTeamName = "LSU";
-					break;
-				case "LOYOLA CHICAGO":
-					matchingTeamName = "LOYOLA ILLINOIS";
-					break;
-				case "BRIGHAM YOUNG":
-					matchingTeamName = "BYU";
-					break;
-				case "CAL POLY SLO":
-					matchingTeamName = "CAL POLY";
-					break;
-				case "SOUTHERN METHODIST":
-					matchingTeamName = "SMU";
-					break;
-				case "CHARLESTON":
-					matchingTeamName = "COLLEGE OF CHARLESTON";
-					break;
-			}
-			
-			for (PowerRanking team : matches)
-			{
-				if (team.getTeamName().equals(matchingTeamName))
-				{
-					return team;
-				}
-			}
-			return null;
-		}
-		if (pattern.equals("FW"))
-		{
-			for (PowerRanking matchName: matches)
-			{
-				if (matchName.getTeamName().split(" ")[0].equals(teamName.split(" ")[0]))
-				{
-					secondMatch.add(matchName);
-				}
-			}
-			
-			if (secondMatch.size() == 1)
-			{
-				return secondMatch.get(0);
-			}
-			return TryFindMatch(teamName, matches, "LW");
-		}
-		if (pattern.equals("LW"))
-		{
-			for (PowerRanking matchName: matches)
-			{
-				String[] matchArray = matchName.getTeamName().split(" ");
-				String[] teamNameArray = teamName.split(" ");
-				if (matchArray[matchArray.length - 1].equals(teamNameArray[teamNameArray.length - 1]))
-				{
-					secondMatch.add(matchName);
-				}
-			}
-			
-			if (secondMatch.size() == 1)
-			{
-				return secondMatch.get(0);
-			}
-		}
-		
-		return null;
-	}
 }

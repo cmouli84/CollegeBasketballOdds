@@ -8,14 +8,16 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Repository;
 
-import com.scribble.nbacb.models.NbacbPick;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.models.schedule.Current_season;
@@ -24,24 +26,26 @@ import com.scribble.nbacb.models.schedule.Season;
 @Repository
 public class CollegeBasketBallOddsRepository {
 
-	public List<NbacbPick> getNbacbOdds() throws MalformedURLException, IOException
+	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException
 	{
-		String url = "http://www.sportsline.com/sportsline-web/service/v1/oddsPicks?league=ncaab";
+		List<Event> matches = new ArrayList<>();
+		Calendar toDateCalendar = Calendar.getInstance();
+		toDateCalendar.setTime(eventDate);
+		toDateCalendar.add(Calendar.HOUR, 24);
+		List<Event> eventDayMatches = getMatchesByDate(new SimpleDateFormat("yyyy-MM-dd").format(eventDate));
+		List<Event> nexttEventDayMatches = getMatchesByDate(new SimpleDateFormat("yyyy-MM-dd").format(toDateCalendar.getTime()));
 		
-		String response = getWebResponse(url);
-
-		ObjectMapper mapper = new ObjectMapper();
-		
-		List<NbacbPick> nbacbPicks = Arrays.asList(mapper.readValue(response, NbacbPick[].class));
-		
-		for (NbacbPick pick: nbacbPicks)
+		for (Event event: eventDayMatches)
 		{
-			pick.setHomeTeamName(GetTeamName(pick.getHomeTeamName()));
-			pick.setAwayTeamName(GetTeamName(pick.getAwayTeamName()));
+			matches.add(event);
 		}
-		
-		return nbacbPicks;
-	}
+		for (Event event: nexttEventDayMatches)
+		{
+			matches.add(event);
+		}
+
+		return matches;
+	}	
 	
 	public ArrayList<PowerRanking> getSonnyMoorePowerRaking() throws MalformedURLException, IOException
 	{
@@ -119,7 +123,7 @@ public class CollegeBasketBallOddsRepository {
 		return powerRankings;
 	}
 	
-	public List<Event> getMatchesByDate(String matchDate) throws MalformedURLException, IOException
+	private List<Event> getMatchesByDate(String matchDate) throws MalformedURLException, IOException
 	{
 		String scheduleUrl = "http://api.thescore.com/ncaab/schedule";
 		String eventsUrlFormat = "http://api.thescore.com/ncaab/events?id.in=%s";
@@ -145,8 +149,6 @@ public class CollegeBasketBallOddsRepository {
 			String eventsUrl = String.format(eventsUrlFormat, URLEncoder.encode(eventIds, "utf-8"));
 			
 			String eventsResponse = getWebResponse(eventsUrl);
-			System.out.println(eventsUrl);
-			System.out.println(eventsResponse);
 			matches = Arrays.asList(mapper.readValue(eventsResponse, Event[].class));
 		}
 		
@@ -180,12 +182,7 @@ public class CollegeBasketBallOddsRepository {
 	
 	private String GetTeamName(String teamName)
 	{
-		String formattedTeamName = teamName.trim().toUpperCase().replace('-', ' ');
-		if (formattedTeamName.startsWith("ST."))
-		{
-			formattedTeamName = formattedTeamName.replace((CharSequence)"ST.", (CharSequence)"SAINT");
-		}
-		formattedTeamName = formattedTeamName.replace((CharSequence)"ST.", (CharSequence)"STATE");
+		String formattedTeamName = teamName.trim().toUpperCase();
 		
 		return formattedTeamName;
 	}
