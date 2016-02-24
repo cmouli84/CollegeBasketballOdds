@@ -41,14 +41,10 @@ public class CollegeBasketBallOddsRepository {
 		Calendar toDateCalendar = Calendar.getInstance();
 		toDateCalendar.setTime(eventDate);
 		toDateCalendar.add(Calendar.HOUR, 24);
-		List<Event> eventDayMatches = getMatchesByDate(new SimpleDateFormat("yyyy-MM-dd").format(eventDate), season);
-		List<Event> nexttEventDayMatches = getMatchesByDate(new SimpleDateFormat("yyyy-MM-dd").format(toDateCalendar.getTime()), season);
+		List<Event> eventDayMatches = getMatchesByDate(new SimpleDateFormat("yyyy-MM-dd").format(eventDate),
+				new SimpleDateFormat("yyyy-MM-dd").format(toDateCalendar.getTime()), season);
 		
 		for (Event event: eventDayMatches)
-		{
-			matches.add(event);
-		}
-		for (Event event: nexttEventDayMatches)
 		{
 			matches.add(event);
 		}
@@ -502,25 +498,24 @@ public class CollegeBasketBallOddsRepository {
 		return dictionary;
 	}
 	
-	private List<Event> getMatchesByDate(String matchDate, Season season) throws MalformedURLException, IOException
+	private List<Event> getMatchesByDate(String matchDate, String matchNextDate, Season season) throws MalformedURLException, IOException
 	{
 		String eventsUrlFormat = "http://api.thescore.com/ncaab/events?id.in=%s";
 		List<Event> matches = new ArrayList<>();
 		ObjectMapper mapper = new ObjectMapper();
+		List<Integer> eventIdList = new ArrayList<>();
 		
-		Current_season matchSeason = null;
 		for (Current_season currSeason: season.getCurrent_season())
 		{
-			if (currSeason.getId().equals(matchDate))
+			if (currSeason.getId().equals(matchDate) || currSeason.getId().equals(matchNextDate))
 			{
-				matchSeason = currSeason;
-				break;
+				eventIdList.addAll(currSeason.getEvent_ids());
 			}
 		}
 		
-		if (matchSeason != null)
+		if ((eventIdList != null) && (eventIdList.size() > 0))
 		{
-			String eventIds = String.join(",", Arrays.toString(matchSeason.getEvent_ids().toArray()));
+			String eventIds = String.join(",", Arrays.toString(eventIdList.toArray()));
 			String eventsUrl = String.format(eventsUrlFormat, URLEncoder.encode(eventIds, "utf-8"));
 			
 			String eventsResponse = getWebResponse(eventsUrl);
