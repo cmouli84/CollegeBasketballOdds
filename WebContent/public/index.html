@@ -14,6 +14,14 @@
            .then(function(res){
               $scope.picks = res.data;                
             });
+      
+      $scope.getWestGatePointSpread = function(westGatePointSpread) {
+    	  return (westGatePointSpread === -999999) ? "Not Available" : westGatePointSpread;
+      }
+      
+      $scope.getGameScore = function(pick) {
+    	  return (pick.homeScore === -999999) ? "Not Started" : pick.homeScore + "-" + pick.awayScore;
+      }
     });
 
   </script>
@@ -147,19 +155,21 @@
       <table class="table table-striped col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <thead>
           <tr>
-            <th class="col-lg-3 col-md-3 col-sm-3 col-xs-3">Match</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Match</th>
             <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Home Team<br>Wins-Loses</th>
             <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Away Team<br>Wins-Loses</th>
-            <th class="col-lg-3 col-md-3 col-sm-3 col-xs-3">Westgate Odds</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Westgate Odds</th>
             <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Sonny Moore Odds</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Score<br />Home-Away</th>
           </tr>
         </thead>
         <tr ng-repeat="pick in picks">
-          <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3"><div class="small">{{pick.gameDate}}</div><strong>{{pick.awayTeamName}}<br>@{{pick.homeTeamName}}</strong></td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><div class="small">{{pick.gameDate}}</div><strong>{{pick.awayTeamName}}<br>@{{pick.homeTeamName}}</strong></td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.homeWins}}-{{pick.homeLoses}}</td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.awayWins}}-{{pick.awayLoses}}</td>
-          <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="vertical-align:middle">{{pick.westgateCurrentPointSpread}}</td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.sonnyMoorePointSpread}}</td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getGameScore(pick)}}</td>
         </tr>
       </table>
     </div> 

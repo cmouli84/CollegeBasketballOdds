@@ -1,6 +1,6 @@
 package com.scribble.nbacb.models;
 
-public class NbacbPrediction {
+public class NbacbPrediction implements Comparable<NbacbPrediction> {
 
 	private String homeTeamName;
 	private String awayTeamName;
@@ -12,6 +12,8 @@ public class NbacbPrediction {
 	private Double westgateOpeningPointSpread;
 	private Double sonnyMoorePointSpread;
 	private String gameDate;
+	private Integer homeScore;
+	private Integer awayScore;
 	/**
 	 * @return the homeTeamName
 	 */
@@ -132,5 +134,36 @@ public class NbacbPrediction {
 	public void setGameDate(String gameDate) {
 		this.gameDate = gameDate;
 	}
+    
+	@Override
+	public int compareTo(NbacbPrediction o) {
+		// TODO Auto-generated method stub
+        return gameDate.compareTo(o.getGameDate());
+	}
+	/**
+	 * @return the homeScore
+	 */
+	public Integer getHomeScore() {
+		return homeScore;
+	}
+	/**
+	 * @param homeScore the homeScore to set
+	 */
+	public void setHomeScore(Integer homeScore) {
+		this.homeScore = homeScore;
+	}
+	/**
+	 * @return the awayScore
+	 */
+	public Integer getAwayScore() {
+		return awayScore;
+	}
+	/**
+	 * @param awayScore the awayScore to set
+	 */
+	public void setAwayScore(Integer awayScore) {
+		this.awayScore = awayScore;
+	}
+
 	
 }
