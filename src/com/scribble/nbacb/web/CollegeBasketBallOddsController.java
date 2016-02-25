@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.scribble.nbacb.models.NbacbPrediction;
-import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.service.CollegeBasketBallOddsService;
 
 @Path("/nbacb")

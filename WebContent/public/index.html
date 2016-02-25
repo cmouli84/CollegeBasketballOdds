@@ -9,11 +9,22 @@
   <script type="text/javascript">
     var App = angular.module('App', []);
 
-    App.controller('NbacbCtrl', function($scope, $http) {
+    App.controller('NbacbCtrl', function($scope, $http, $filter) {
       $http.get('/api/nbacb')
            .then(function(res){
               $scope.picks = res.data;                
             });
+      
+      $scope.eventDates = [];
+      
+      for (var i=0; i<7; i++) {
+          var eventDate = new Date();
+          eventDate.setDate(eventDate.getDate() - 3 + i);
+    	  $scope.eventDates.push({
+    		  date: eventDate,
+    		  selected: (i === 3)
+    	  });
+   	  }
       
       $scope.getWestGatePointSpread = function(westGatePointSpread) {
     	  return (westGatePointSpread === -999999) ? "Not Available" : westGatePointSpread;
@@ -22,6 +33,18 @@
       $scope.getGameScore = function(pick) {
     	  return (pick.homeScore === -999999) ? "Not Started" : pick.homeScore + "-" + pick.awayScore;
       }
+      
+      $scope.loadMatchesByDate = function(event) {
+          $http.get('/api/nbacb/' + $filter('date')(event.date, "yyyy-MM-dd"))
+          .then(function(res){
+             $scope.picks = res.data;
+             
+             angular.forEach($scope.eventDates, function(value, key) {
+            	  value.selected = (value.date == event.date);
+            	});
+           });
+      }
+      
     });
 
   </script>
@@ -74,84 +97,17 @@
   </style>
 </head>
 <body>
-  <div>  
+  <div ng-controller="NbacbCtrl">  
     <div class="container">
       <div class="scroller scroller-left"><i class="glyphicon glyphicon-chevron-left"></i></div>
       <div class="scroller scroller-right"><i class="glyphicon glyphicon-chevron-right"></i></div>
       <div class="wrapper">
-        <ul class="nav nav-tabs list" id="myTab">
-          <li><a href="#home">Home</a></li>
-          <li><a href="#profile">Profile</a></li>
-          <li><a href="#messages">Messages1</a></li>
-          <li><a href="#settings">Settings</a></li>
-          <li><a href="#">Tab4</a></li>
-          <li><a href="#">Tab5</a></li>
-          <li><a href="#">Tab6</a></li>
-          <li><a href="#">Tab7</a></li>
-          <li><a href="#">Tab8</a></li>
-          <li><a href="#">Tab9</a></li>
-          <li><a href="#">Tab10</a></li>
-          <li><a href="#">Tab11</a></li>
-          <li><a href="#">Tab12</a></li>
-          <li><a href="#">Tab13</a></li>
-          <li class="active"><a href="#">Tab14</a></li>
-          <li><a href="#">Tab15</a></li>
-          <li><a href="#">Tab16</a></li>
-          <li><a href="#">Tab17</a></li>
-          <li><a href="#">Tab4</a></li>
-          <li><a href="#">Tab5</a></li>
-          <li><a href="#">Tab6</a></li>
-          <li><a href="#">Tab7</a></li>
-          <li><a href="#">Tab8</a></li>
-          <li><a href="#">Tab9</a></li>
-          <li><a href="#">Tab10</a></li>
-          <li><a href="#">Tab11</a></li>
-          <li><a href="#">Tab12</a></li>
-          <li><a href="#">Tab13</a></li>
-          <li><a href="#">Tab4</a></li>
-          <li><a href="#">Tab5</a></li>
-          <li><a href="#">Tab6</a></li>
-          <li><a href="#">Tab7</a></li>
-          <li><a href="#">Tab8</a></li>
-          <li><a href="#">Tab9</a></li>
-          <li><a href="#">Tab10</a></li>
-          <li><a href="#">Tab11</a></li>
-          <li><a href="#">Tab12</a></li>
-          <li><a href="#">Tab13</a></li>
-          <li><a href="#">Tab4</a></li>
-          <li><a href="#">Tab5</a></li>
-          <li><a href="#">Tab6</a></li>
-          <li><a href="#">Tab7</a></li>
-          <li><a href="#">Tab8</a></li>
-          <li><a href="#">Tab9</a></li>
-          <li><a href="#">Tab10</a></li>
-          <li><a href="#">Tab11</a></li>
-          <li><a href="#">Tab12</a></li>
-          <li><a href="#">Tab13</a></li>
-          <li><a href="#">Tab4</a></li>
-          <li><a href="#">Tab5</a></li>
-          <li><a href="#">Tab6</a></li>
-          <li><a href="#">Tab7</a></li>
-          <li><a href="#">Tab8</a></li>
-          <li><a href="#">Tab9</a></li>
-          <li><a href="#">Tab10</a></li>
-          <li><a href="#">Tab11</a></li>
-          <li><a href="#">Tab12</a></li>
-          <li><a href="#">Tab13</a></li>
-          <li><a href="#">Tab4</a></li>
-          <li><a href="#">Tab5</a></li>
-          <li><a href="#">Tab6</a></li>
-          <li><a href="#">Tab7</a></li>
-          <li><a href="#">Tab8</a></li>
-          <li><a href="#">Tab9</a></li>
-          <li><a href="#">Tab10</a></li>
-          <li><a href="#">Tab11</a></li>
-          <li><a href="#">Tab12</a></li>
-          <li><a href="#">Tab13</a></li>
+        <ul class="nav nav-tabs list" id="myTab" >
+          <li ng-class="{'active' : event.selected}" ng-repeat="event in eventDates"><a href="#" ng-click="loadMatchesByDate(event)">{{event.date | date:'MM/dd/yyyy'}}</a></li>
       </ul>
       </div>
     </div>
-    <div class="container" ng-controller="NbacbCtrl">
+    <div class="container">
       <table class="table table-striped col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <thead>
           <tr>

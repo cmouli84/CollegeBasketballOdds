@@ -62,7 +62,8 @@ public class CollegeBasketBallOddsService {
 			PowerRanking awayTeamRanking = teamMappings.get(scoreApiAwayTeamName) == null 
 					? null : getMatchingTeamName(powerRankings, teamMappings.get(scoreApiAwayTeamName));
 
-			Double sonnyMooreOdds = Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 3.25) * 100.0) / 100.0;
+			Double sonnyMooreOdds = (homeTeamRanking == null || awayTeamRanking == null) 
+					? 0 : Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 3.25) * 100.0) / 100.0;
 			
 			Double currentOdd = event.getOdd() == null || event.getOdd().getHome_odd().startsWith("pk") 
 					? -999999 
@@ -80,9 +81,9 @@ public class CollegeBasketBallOddsService {
 				setGameDate(new SimpleDateFormat("EEE MM/dd hh:mm a z").format(eventDate));
 				setWestgateCurrentPointSpread(currentOdd);
 				setSonnyMoorePointSpread(sonnyMooreOdds);
-				setHomeScore(((eventDate.getTime() > currentDate.getTime()) || ((event.getBox_score() != null) && (event.getBox_score().getScore() != null))) 
+				setHomeScore(((eventDate.getTime() > currentDate.getTime()) || (event.getBox_score() == null) || (event.getBox_score().getScore() == null)) 
 						? -999999 : event.getBox_score().getScore().getHome().getScore());
-				setAwayScore(((eventDate.getTime() > currentDate.getTime()) && ((event.getBox_score() != null) && (event.getBox_score().getScore() != null))) 
+				setAwayScore(((eventDate.getTime() > currentDate.getTime()) || (event.getBox_score() == null) || (event.getBox_score().getScore() == null)) 
 						? -999999 : event.getBox_score().getScore().getAway().getScore());
 			}});
 		}
