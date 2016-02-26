@@ -48,6 +48,11 @@
 		<artifactId>jackson-mapper-asl</artifactId>
 		<version>1.9.13</version>
 	</dependency>
+  	<dependency>
+  		<groupId>com.amazonaws</groupId>
+  		<artifactId>aws-java-sdk-dynamodb</artifactId>
+  		<version>1.10.52</version>
+  	</dependency>
   </dependencies>
   <properties>
     <java.version>1.8</java.version>

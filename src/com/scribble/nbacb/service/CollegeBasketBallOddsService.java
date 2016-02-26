@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -14,10 +15,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.NbacbPrediction;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
-import com.scribble.nbacb.models.standings.Standing;
 import com.scribble.nbacb.repository.CollegeBasketBallOddsRepository;
 
 @Service
@@ -34,9 +35,17 @@ public class CollegeBasketBallOddsService {
 		
 		List<Event> events = nbacbRepository.getEventsByDate(matchDate); 
 		
-		List<Standing> standings = nbacbRepository.getTeamStandings();
+		//List<Standing> standings = nbacbRepository.getTeamStandings();
 		
 		List<PowerRanking> powerRankings = nbacbRepository.getSonnyMoorePowerRaking();
+		List<EventPowerRanking> eventPowerRankings = null;
+		
+		Boolean isPastEventDate = getIsPastDate(matchDate, currentDate);
+		
+		if (isPastEventDate)
+		{
+			eventPowerRankings = nbacbRepository.getSonnyMooreEventsByDate(events);
+		}
 		
 		Map<String, String> teamMappings = nbacbRepository.getScoreApiAndSonnyMooreTeamMapping();
 		
@@ -54,18 +63,29 @@ public class CollegeBasketBallOddsService {
 			String scoreApiHomeTeamName = event.getHome_team().getFull_name();
 			String scoreApiAwayTeamName = event.getAway_team().getFull_name();
 			
-			Standing homeTeamStanding = getTeamStanding(scoreApiHomeTeamName, standings);
-			Standing awayTeamStanding = getTeamStanding(scoreApiAwayTeamName, standings);
+			//Standing homeTeamStanding = getTeamStanding(scoreApiHomeTeamName, standings);
+			//Standing awayTeamStanding = getTeamStanding(scoreApiAwayTeamName, standings);
 			
 			PowerRanking homeTeamRanking = teamMappings.get(scoreApiHomeTeamName) == null 
 					? null : getMatchingTeamName(powerRankings, teamMappings.get(scoreApiHomeTeamName));
 			PowerRanking awayTeamRanking = teamMappings.get(scoreApiAwayTeamName) == null 
 					? null : getMatchingTeamName(powerRankings, teamMappings.get(scoreApiAwayTeamName));
-
-			Double sonnyMooreOdds = (homeTeamRanking == null || awayTeamRanking == null) 
-					? 0 : Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 3.25) * 100.0) / 100.0;
+			Double sonnyMooreOdds;
+			if (isPastEventDate)
+			{
+				EventPowerRanking eventPowerRanking = getEventPowerRankingById(eventPowerRankings, event.getId());
+				sonnyMooreOdds = (eventPowerRanking == null) 
+						? -999999
+						: Math.round((eventPowerRanking.getAwayTeamRanking() - eventPowerRanking.getHomeTeamRanking() - 3.25) * 100.0) / 100.0;
+			}
+			else
+			{	
+				sonnyMooreOdds = (homeTeamRanking == null || awayTeamRanking == null) 
+						? -999999
+						: Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 3.25) * 100.0) / 100.0;
+			}
 			
-			Double currentOdd = event.getOdd() == null || event.getOdd().getHome_odd().startsWith("pk") 
+			Double currentOdd = event.getOdd() == null || event.getOdd().getHome_odd().startsWith("pk") || event.getOdd().getHome_odd().startsWith("N") 
 					? -999999 
 					: event.getOdd().getHome_odd().startsWith("T") 
 						? (-1) * Double.parseDouble(event.getOdd().getAway_odd()) 
@@ -74,10 +94,10 @@ public class CollegeBasketBallOddsService {
 			nbacbPredictions.add(new NbacbPrediction() {{
 				setHomeTeamName(scoreApiHomeTeamName);
 				setAwayTeamName(scoreApiAwayTeamName);
-				setHomeWins(homeTeamStanding == null ? 0 : homeTeamStanding.getWins());
-				setHomeLoses(homeTeamStanding == null ? 0 : homeTeamStanding.getLosses());
-				setAwayWins(awayTeamStanding == null ? 0 : awayTeamStanding.getWins());
-				setAwayLoses(awayTeamStanding == null ? 0 : awayTeamStanding.getLosses());
+				setHomeWins(homeTeamRanking == null ? 0 : homeTeamRanking.getWins());
+				setHomeLoses(homeTeamRanking == null ? 0 : homeTeamRanking.getLoses());
+				setAwayWins(awayTeamRanking == null ? 0 : awayTeamRanking.getWins());
+				setAwayLoses(awayTeamRanking == null ? 0 : awayTeamRanking.getLoses());
 				setGameDate(new SimpleDateFormat("EEE MM/dd hh:mm a z").format(eventDate));
 				setWestgateCurrentPointSpread(currentOdd);
 				setSonnyMoorePointSpread(sonnyMooreOdds);
@@ -92,8 +112,19 @@ public class CollegeBasketBallOddsService {
 		
 		return nbacbPredictions;
 	}
+
+	private Boolean getIsPastDate(Date matchDate, Date currentDate) {
+		Calendar matchDateCalendar = Calendar.getInstance();
+		matchDateCalendar.setTime(matchDate);
+		Calendar currentDateCalendar = Calendar.getInstance();
+		currentDateCalendar.setTime(currentDate);
+		return (matchDateCalendar.get(Calendar.YEAR) < currentDateCalendar.get(Calendar.YEAR))
+				|| (matchDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR) && matchDateCalendar.get(Calendar.MONTH) < currentDateCalendar.get(Calendar.MONTH))
+				|| (matchDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR) 
+					&& matchDateCalendar.get(Calendar.MONTH) == currentDateCalendar.get(Calendar.MONTH) && matchDateCalendar.get(Calendar.DATE) < currentDateCalendar.get(Calendar.DATE));
+	}
 	
-	private Standing getTeamStanding(String teamName, List<Standing> standings)
+	/*private Standing getTeamStanding(String teamName, List<Standing> standings)
 	{
 		for (Standing standing: standings)
 		{
@@ -103,7 +134,7 @@ public class CollegeBasketBallOddsService {
 			}
 		}
 		return null;
-	}
+	}*/
 	
 	private PowerRanking getMatchingTeamName(List<PowerRanking> sonnyMoorePowerRanking, String teamName) {
 		for (PowerRanking powerRanking : sonnyMoorePowerRanking)
@@ -113,8 +144,17 @@ public class CollegeBasketBallOddsService {
 				return powerRanking;
 			}
 		}
-		
 		return null;
 	}
 	
+	private EventPowerRanking getEventPowerRankingById(List<EventPowerRanking> eventPowerRankings, Integer eventId) {
+		for (EventPowerRanking eventPowerRanking : eventPowerRankings)
+		{
+			if (eventPowerRanking.getEventId().equals(eventId))
+			{
+				return eventPowerRanking;
+			}
+		}
+		return null;
+	}
 }

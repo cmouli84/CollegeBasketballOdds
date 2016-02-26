@@ -34,6 +34,35 @@
     	  return (pick.homeScore === -999999) ? "Not Started" : pick.homeScore + "-" + pick.awayScore;
       }
       
+      $scope.getSonnyMooreOdds = function(pick) {
+    	  return (pick.sonnyMoorePointSpread === -999999) ? "Not Available" : pick.sonnyMoorePointSpread;
+      }
+
+      $scope.getSonnyMooreStatusClass = function(pick) {
+    	  if (pick.sonnyMoorePointSpread === -999999 || pick.westgateCurrentPointSpread === -999999)
+   		  {
+    		  return "";
+   		  }
+    	  
+    	  var dtCurrentDate = new Date();
+    	  var dtGameDate = new Date(pick.gameDate);
+    	  dtGameDate.setFullYear((dtGameDate.getMonth()>6 && dtCurrentDate.getMonth()>6) || (dtGameDate.getMonth()<=6 && dtCurrentDate.getMonth()<=6) 
+    			  ? dtCurrentDate.getFullYear() : dtCurrentDate.getFullYear() - 1 );
+    	  var gameDate = $filter('date')(dtGameDate, "yyyyMMdd");
+    	  var currentDate = $filter('date')(dtCurrentDate, "yyyyMMdd");
+    	  if (gameDate < currentDate)
+   		  {
+    		  if ((((pick.awayScore - pick.homeScore) > pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread > pick.westgateCurrentPointSpread)) 
+    				  || (((pick.awayScore - pick.homeScore) < pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread < pick.westgateCurrentPointSpread))) 
+   			  {
+   			  		return "success";
+   			  }
+			  return "danger";
+   		  }
+    	  
+    	  return "";
+      }
+
       $scope.loadMatchesByDate = function(event) {
           $http.get('/api/nbacb/' + $filter('date')(event.date, "yyyy-MM-dd"))
           .then(function(res){
@@ -119,12 +148,12 @@
             <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Score<br />Home-Away</th>
           </tr>
         </thead>
-        <tr ng-repeat="pick in picks">
+        <tr ng-class="getSonnyMooreStatusClass(pick)" ng-repeat="pick in picks">
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><div class="small">{{pick.gameDate}}</div><strong>{{pick.awayTeamName}}<br>@{{pick.homeTeamName}}</strong></td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.homeWins}}-{{pick.homeLoses}}</td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.awayWins}}-{{pick.awayLoses}}</td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.sonnyMoorePointSpread}}</td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getSonnyMooreOdds(pick)}}</td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getGameScore(pick)}}</td>
         </tr>
       </table>

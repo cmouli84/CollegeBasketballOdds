@@ -4,10 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,11 +18,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Repository;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.models.schedule.Current_season;
@@ -116,7 +129,7 @@ public class CollegeBasketBallOddsRepository {
 					
 					powerRankings.add(new PowerRanking()
 							{{
-								setTeamName(GetTeamName(teamName));
+								setTeamName(getFormattedTeamName(teamName));
 								setWins(wins);
 								setLoses(loses);
 								setTies(ties);
@@ -137,6 +150,50 @@ public class CollegeBasketBallOddsRepository {
 		System.out.println("Power Ranking Count " + powerRankings.size());
 		
 		return powerRankings;
+	}
+
+	public List<EventPowerRanking> getSonnyMooreEventsByDate(List<Event> events) throws ParseException, UnknownHostException {
+		
+		List<EventPowerRanking> eventPowerRankings = new ArrayList<>();
+
+		ClientConfiguration clientConfiguration = new ClientConfiguration();
+		if (InetAddress.getLocalHost().getHostName().toUpperCase().equals("V00972473"))
+		{
+			clientConfiguration.setProxyHost("webproxysea.nordstrom.net");
+			clientConfiguration.setProxyPort(8181);
+		}
+		
+		AmazonDynamoDB amazonDynamoDb = new AmazonDynamoDBClient(clientConfiguration).<AmazonDynamoDBClient>withRegion(Regions.US_WEST_2);
+		
+        DynamoDB dynamoDb = new DynamoDB(amazonDynamoDb);
+
+        Table teams = dynamoDb.getTable("Events");
+
+        for (Event event: events)
+        {
+        	System.out.println("Event Id : " + event.getId());
+        	
+        	PrimaryKey primaryKey = new PrimaryKey();
+			primaryKey.addComponent("EventId", event.getId());
+        
+        	Item item = teams.getItem(primaryKey);
+        	
+        	if (item == null)
+        	{
+        		continue;
+        	}
+        	
+        	eventPowerRankings.add(new EventPowerRanking() {{
+        		setEventId(item.getInt("EventId"));
+        		setHomeTeamName(item.getString("HomeTeamName"));
+        		setHomeTeamRanking(item.getDouble("HomeTeamRanking"));
+        		setAwayTeamName(item.getString("AwayTeamName"));
+        		setAwayTeamRanking(item.getDouble("AwayTeamRanking"));
+        		setEventDate(new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.ENGLISH).parse(item.getString("EventDate")));
+        	}});
+        }
+		
+		return eventPowerRankings;
 	}
 	
 	public Map<String, String> getScoreApiAndSonnyMooreTeamMapping()
@@ -550,7 +607,7 @@ public class CollegeBasketBallOddsRepository {
 		return response.toString();
 	}
 	
-	private String GetTeamName(String teamName)
+	private String getFormattedTeamName(String teamName)
 	{
 		String formattedTeamName = teamName.trim().toUpperCase();
 		
