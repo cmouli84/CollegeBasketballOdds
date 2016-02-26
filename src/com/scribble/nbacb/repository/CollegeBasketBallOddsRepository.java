@@ -42,14 +42,19 @@ import com.scribble.nbacb.models.standings.Standing;
 @Repository("Realtime")
 public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRepository {
 
-	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException
+	private Season season;
+	
+	public List<Event> getEventsByDate(Date eventDate, Boolean isPastEventDate) throws MalformedURLException, IOException
 	{
-		String scheduleUrl = "http://api.thescore.com/ncaab/schedule";
-		ObjectMapper mapper = new ObjectMapper();
+		if (season == null)
+		{
+			String scheduleUrl = "http://api.thescore.com/ncaab/schedule";
+			ObjectMapper mapper = new ObjectMapper();
+			
+			String scheduleResponse = getWebResponse(scheduleUrl);
+			season = mapper.readValue(scheduleResponse, Season.class);
+		}
 		
-		String scheduleResponse = getWebResponse(scheduleUrl);
-		Season season = mapper.readValue(scheduleResponse, Season.class);
-
 		List<Event> matches = new ArrayList<>();
 		Calendar toDateCalendar = Calendar.getInstance();
 		toDateCalendar.setTime(eventDate);
@@ -152,7 +157,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		return powerRankings;
 	}
 
-	public List<EventPowerRanking> getSonnyMooreEventsByDate(List<Event> events) throws ParseException, UnknownHostException {
+	public List<EventPowerRanking> getSonnyMooreEventsByDate(Date matchDate, List<Event> events) throws ParseException, UnknownHostException {
 		
 		List<EventPowerRanking> eventPowerRankings = new ArrayList<>();
 

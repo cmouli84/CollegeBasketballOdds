@@ -35,18 +35,18 @@ public class CollegeBasketBallOddsService {
 		
 		List<NbacbPrediction> nbacbPredictions = new ArrayList<>();
 		
-		List<Event> events = nbacbRepository.getEventsByDate(matchDate); 
+		Boolean isPastEventDate = getIsPastDate(matchDate);
+		
+		List<Event> events = nbacbRepository.getEventsByDate(matchDate, isPastEventDate); 
 		
 		//List<Standing> standings = nbacbRepository.getTeamStandings();
 		
 		List<PowerRanking> powerRankings = nbacbRepository.getSonnyMoorePowerRaking();
 		List<EventPowerRanking> eventPowerRankings = null;
 		
-		Boolean isPastEventDate = getIsPastDate(matchDate, currentDate);
-		
 		if (isPastEventDate)
 		{
-			eventPowerRankings = nbacbRepository.getSonnyMooreEventsByDate(events);
+			eventPowerRankings = nbacbRepository.getSonnyMooreEventsByDate(matchDate, events);
 		}
 		
 		Map<String, String> teamMappings = nbacbRepository.getScoreApiAndSonnyMooreTeamMapping();
@@ -115,11 +115,10 @@ public class CollegeBasketBallOddsService {
 		return nbacbPredictions;
 	}
 
-	private Boolean getIsPastDate(Date matchDate, Date currentDate) {
+	private Boolean getIsPastDate(Date matchDate) {
 		Calendar matchDateCalendar = Calendar.getInstance();
 		matchDateCalendar.setTime(matchDate);
 		Calendar currentDateCalendar = Calendar.getInstance();
-		currentDateCalendar.setTime(currentDate);
 		return (matchDateCalendar.get(Calendar.YEAR) < currentDateCalendar.get(Calendar.YEAR))
 				|| (matchDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR) && matchDateCalendar.get(Calendar.MONTH) < currentDateCalendar.get(Calendar.MONTH))
 				|| (matchDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR) 

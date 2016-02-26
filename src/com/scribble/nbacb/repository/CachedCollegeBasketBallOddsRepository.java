@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,15 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 
 	private Cache<String, List<Event>> eventsCache;
 	
+	private Cache<String, List<Event>> eventsCachePermanent;
+	
 	private Cache<String, List<PowerRanking>> powerRankingsCache;
+	
+	private Cache<String, List<EventPowerRanking>> eventPowerRankingsCache;
+	
+	private Map<String, String> eventsCacheKeys = new HashMap<String, String>();
+	
+	private Map<String, String> eventsPowerRankingsCacheKeys = new HashMap<String, String>();
 	
 	public CachedCollegeBasketBallOddsRepository() {
 		// TODO Auto-generated constructor stub
@@ -36,24 +45,46 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 			    .expireAfterWrite(15, TimeUnit.MINUTES)
 			    .build();
 
+		eventsCachePermanent = CacheBuilder.newBuilder()
+			    .concurrencyLevel(4)
+			    .weakKeys()
+			    .maximumSize(10000)
+			    .expireAfterWrite(7, TimeUnit.DAYS)
+			    .build();
+
 		powerRankingsCache = CacheBuilder.newBuilder()
 			    .concurrencyLevel(4)
 			    .weakKeys()
 			    .maximumSize(10000)
 			    .expireAfterWrite(60, TimeUnit.MINUTES)
 			    .build();
+
+		eventPowerRankingsCache = CacheBuilder.newBuilder()
+			    .concurrencyLevel(4)
+			    .weakKeys()
+			    .maximumSize(10000)
+			    .expireAfterWrite(7, TimeUnit.DAYS)
+			    .build();
 	}
 	
 	@Override
-	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException {
+	public List<Event> getEventsByDate(Date eventDate, Boolean isPastEventDate) throws MalformedURLException, IOException {
 		// TODO Auto-generated method stub
-		String formattedDate = new SimpleDateFormat("yyyy-MM-dd z").format(eventDate);
-		List<Event> events = eventsCache.getIfPresent(formattedDate);
+		String formattedDate = new SimpleDateFormat("yyyyMMddz").format(eventDate);
+		if (!eventsCacheKeys.containsKey(formattedDate))
+		{
+			eventsCacheKeys.put(formattedDate, formattedDate);
+		}
+		String cacheKey = eventsCacheKeys.get(formattedDate);
 		
+		Cache<String, List<Event>> cache = isPastEventDate ? eventsCachePermanent : eventsCache;
+		List<Event> events = cache.getIfPresent(cacheKey);
+		
+		System.out.println(cacheKey);
 		if (events == null)
 		{
-			events = super.getEventsByDate(eventDate);
-			eventsCache.put(formattedDate, events);
+			events = super.getEventsByDate(eventDate, isPastEventDate);
+			cache.put(cacheKey, events);
 		}
 		
 		return events;
@@ -80,10 +111,25 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 	}
 
 	@Override
-	public List<EventPowerRanking> getSonnyMooreEventsByDate(List<Event> events)
+	public List<EventPowerRanking> getSonnyMooreEventsByDate(Date matchDate, List<Event> events)
 			throws ParseException, UnknownHostException {
 		// TODO Auto-generated method stub
-		return super.getSonnyMooreEventsByDate(events);
+		String formattedDate = new SimpleDateFormat("yyyyMMddz").format(matchDate);
+		if (!eventsPowerRankingsCacheKeys.containsKey(formattedDate))
+		{
+			eventsPowerRankingsCacheKeys.put(formattedDate, formattedDate);
+		}
+		String cacheKey = eventsPowerRankingsCacheKeys.get(formattedDate);
+		List<EventPowerRanking> eventsPowerRankings = eventPowerRankingsCache.getIfPresent(cacheKey);
+		
+		System.out.println(cacheKey);
+		if (eventsPowerRankings == null)
+		{
+			eventsPowerRankings = super.getSonnyMooreEventsByDate(matchDate, events);
+			eventPowerRankingsCache.put(cacheKey, eventsPowerRankings);
+		}
+
+		return eventsPowerRankings;
 	}
 
 	@Override

@@ -15,13 +15,13 @@ import com.scribble.nbacb.models.standings.Standing;
 
 public interface ICollegeBasketBallOddsRepository {
 	
-	List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException;
+	List<Event> getEventsByDate(Date eventDate, Boolean isPastEventDate) throws MalformedURLException, IOException;
 
 	List<Standing> getTeamStandings() throws MalformedURLException, IOException;
 	
 	List<PowerRanking> getSonnyMoorePowerRaking() throws MalformedURLException, IOException;
 	
-	List<EventPowerRanking> getSonnyMooreEventsByDate(List<Event> events) throws ParseException, UnknownHostException;
+	List<EventPowerRanking> getSonnyMooreEventsByDate(Date matchDate, List<Event> events) throws ParseException, UnknownHostException;
 	
 	Map<String, String> getScoreApiAndSonnyMooreTeamMapping();
 }
