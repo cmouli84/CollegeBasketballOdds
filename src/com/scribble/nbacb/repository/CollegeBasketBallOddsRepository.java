@@ -39,8 +39,8 @@ import com.scribble.nbacb.models.schedule.Current_season;
 import com.scribble.nbacb.models.schedule.Season;
 import com.scribble.nbacb.models.standings.Standing;
 
-@Repository
-public class CollegeBasketBallOddsRepository {
+@Repository("Realtime")
+public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRepository {
 
 	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException
 	{
@@ -169,10 +169,10 @@ public class CollegeBasketBallOddsRepository {
 
         Table teams = dynamoDb.getTable("Events");
 
-        for (Event event: events)
-        {
-        	System.out.println("Event Id : " + event.getId());
-        	
+    	System.out.println("Event Count : " + events.size());
+
+    	for (Event event: events)
+        {        	
         	PrimaryKey primaryKey = new PrimaryKey();
 			primaryKey.addComponent("EventId", event.getId());
         
@@ -593,6 +593,7 @@ public class CollegeBasketBallOddsRepository {
 		//con.setRequestProperty("User-Agent", USER_AGENT);
 
 		int responseCode = con.getResponseCode();
+		System.out.println("Request Url : " + url);
 		System.out.println("Response Code : " + responseCode);
 
 		BufferedReader in = new BufferedReader(

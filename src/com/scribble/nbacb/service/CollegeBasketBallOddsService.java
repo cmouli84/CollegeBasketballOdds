@@ -13,19 +13,21 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.NbacbPrediction;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
-import com.scribble.nbacb.repository.CollegeBasketBallOddsRepository;
+import com.scribble.nbacb.repository.ICollegeBasketBallOddsRepository;
 
 @Service
 public class CollegeBasketBallOddsService {
 
 	@Autowired
-	private CollegeBasketBallOddsRepository nbacbRepository;
+	@Qualifier("Cached")
+	private ICollegeBasketBallOddsRepository nbacbRepository;
 
 	public List<NbacbPrediction> getMatchesByDate(Date matchDate) throws IOException, ParseException
 	{
