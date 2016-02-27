@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en" ng-app="App">
+    <head>
+        <title>Bootply snippet - Bootstrap horizontal scrolling tabs</title>
+        <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.js"></script>
+  <script type="text/javascript">
+    var App = angular.module('App', []);
+
+    App.controller('NbacbCtrl', function($scope, $http, $filter) {
+      
+      $scope.eventDates = [];
+      
+      for (var i=0; i<21; i++) {
+          var eventDate = new Date();
+          eventDate.setDate(eventDate.getDate() - 10 + i);
+    	  $scope.eventDates.push({
+    		  date: eventDate,
+    		  selected: (i === 10)
+    	  });
+   	  }
+    });
+    </script>
+  <!-- CSS code from Bootply.com editor -->
+        
+        <style type="text/css">
+            .wrapper {
+    position:relative;
+    margin:0 auto;
+    overflow:hidden;
+	padding:5px;
+  	height:50px;
+}
+
+.list {
+    position:absolute;
+    left:0px;
+    top:0px;
+  	min-width:3000px;
+  	margin-left:12px;
+    margin-top:0px;
+}
+
+.list li{
+	display:table-cell;
+    position:relative;
+    text-align:center;
+    cursor:grab;
+    cursor:-webkit-grab;
+    color:#efefef;
+    vertical-align:middle;
+}
+
+.scroller {
+  text-align:center;
+  cursor:pointer;
+  display:none;
+  padding:7px;
+  padding-top:11px;
+  white-space:no-wrap;
+  vertical-align:middle;
+  background-color:#fff;
+}
+
+.scroller-right{
+  float:right;
+}
+
+.scroller-left {
+  float:left;
+}
+        </style>
+    </head>
+    
+    <!-- HTML code from Bootply.com editor -->
+    
+    <body  ng-controller="NbacbCtrl" >
+        
+        
+<div class="container">
+  <div class="scroller scroller-left"><i class="glyphicon glyphicon-chevron-left"></i></div>
+  <div class="scroller scroller-right"><i class="glyphicon glyphicon-chevron-right"></i></div>
+  <div class="wrapper">
+        <ul class="nav nav-tabs list" id="myTab" >
+          <li ng-class="{'active' : event.selected}" ng-repeat="event in eventDates"><a href="#" ng-click="loadMatchesByDate(event)">{{event.date | date:'MMM'}} {{event.date | date:'dd'}}</a></li>
+      </ul>
+  </div>
+</div>
+
+
+
+
+        
+        <script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+
+        <script type='text/javascript' src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+
+
+
+
+
+        
+        <!-- JavaScript jQuery code from Bootply.com editor  -->
+        
+        <script type='text/javascript'>
+        
+        $(document).ready(function() {
+        
+            var hidWidth;
+var scrollBarWidths = 40;
+
+var widthOfList = function(){
+  var itemsWidth = 0;
+  $('.list li').each(function(){
+    var itemWidth = $(this).outerWidth();
+    itemsWidth+=itemWidth;
+  });
+  return itemsWidth;
+};
+
+var widthOfHidden = function(){
+  return (($('.wrapper').outerWidth())-widthOfList()-getLeftPosi())-scrollBarWidths;
+};
+
+var getLeftPosi = function(){
+  return $('.list').position().left;
+};
+
+var reAdjust = function(){
+  if (($('.wrapper').outerWidth()) < widthOfList()) {
+    $('.scroller-right').show();
+  }
+  else {
+    $('.scroller-right').hide();
+  }
+  
+  if (getLeftPosi()<0) {
+    $('.scroller-left').show();
+  }
+  else {
+    $('.item').animate({left:"-="+getLeftPosi()+"px"},'slow');
+  	$('.scroller-left').hide();
+  }
+}
+
+reAdjust();
+
+$(window).on('resize',function(e){  
+  	reAdjust();
+});
+
+$('.scroller-right').click(function() {
+  
+  $('.scroller-left').fadeIn('slow');
+  $('.scroller-right').fadeOut('slow');
+  
+  $('.list').animate({left:"+="+widthOfHidden()+"px"},'slow',function(){
+
+  });
+});
+
+$('.scroller-left').click(function() {
+  
+	$('.scroller-right').fadeIn('slow');
+	$('.scroller-left').fadeOut('slow');
+  
+  	$('.list').animate({left:"-="+getLeftPosi()+"px"},'slow',function(){
+  	
+  	});
+});    
+        
+        });
+        
+        </script>
+    </body>
+</html>

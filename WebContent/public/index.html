@@ -2,9 +2,10 @@
 <head>
   <meta charset="utf-8">
   <title>College Basket Ball Odds</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://bootswatch.com/cosmo/bootstrap.min.css" />
-  <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type='text/javascript' src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.js"></script>
   <script type="text/javascript">
     var App = angular.module('App', []);
@@ -17,12 +18,12 @@
       
       $scope.eventDates = [];
       
-      for (var i=0; i<7; i++) {
+      for (var i=0; i<21; i++) {
           var eventDate = new Date();
-          eventDate.setDate(eventDate.getDate() - 3 + i);
+          eventDate.setDate(eventDate.getDate() - 10 + i);
     	  $scope.eventDates.push({
     		  date: eventDate,
-    		  selected: (i === 3)
+    		  selected: (i === 10)
     	  });
    	  }
       
@@ -76,34 +77,39 @@
     });
 
   </script>
-<style type="text/css">
+  <style type="text/css">
 .wrapper {
-    position:relative;
-    margin:0 auto;
-    overflow:hidden;
-	padding:5px;
-  	height:50px;
+  position:relative;
+  margin:0 auto;
+  overflow:hidden;
+  padding:5px;
+  height:68px;
 }
 
 .list {
-    position:absolute;
-    left:0px;
-    top:0px;
-  	min-width:3000px;
-  	margin-left:12px;
-    margin-top:0px;
+  position:absolute;
+  left:0px;
+  top:0px;
+  min-width:3000px;
+  margin-left:12px;
+  margin-top:0px;
 }
 
 .list li{
-	display:table-cell;
-    position:relative;
-    text-align:center;
-    cursor:grab;
-    cursor:-webkit-grab;
-    color:#efefef;
-    vertical-align:middle;
+  display:table-cell;
+  position:relative;
+  text-align:center;
+  cursor:grab;
+  cursor:-webkit-grab;
+  color:#efefef;
+  vertical-align:middle;
 }
-
+.nav>li>a {
+  padding-top: 3px;
+  padding-bottom: 6px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
 .scroller {
   text-align:center;
   cursor:pointer;
@@ -131,7 +137,9 @@
       <div class="scroller scroller-right"><i class="glyphicon glyphicon-chevron-right"></i></div>
       <div class="wrapper">
         <ul class="nav nav-tabs list" id="myTab" >
-          <li ng-class="{'active' : event.selected}" ng-repeat="event in eventDates"><a href="#" ng-click="loadMatchesByDate(event)">{{event.date | date:'MM/dd/yyyy'}}</a></li>
+          <li ng-class="{'active' : event.selected}" ng-repeat="event in eventDates">
+            <a href="#" class="text-uppercase" ng-click="loadMatchesByDate(event)"><div style="font-size: 25px">{{event.date | date:'dd'}}</div>{{event.date | date:'MMM'}}</a>
+          </li>
       </ul>
       </div>
     </div>
@@ -158,70 +166,67 @@
       </table>
     </div> 
   </div>
-  <script type="text/javascript">
-    var hidWidth;
-    var scrollBarWidths = 40;
+  <script type='text/javascript'>
+        
+    $(document).ready(function() {
+      var hidWidth;
+      var scrollBarWidths = 40;
+      var widthOfList = function(){
+        var itemsWidth = 0;
+        $('.list li').each(function(){
+          var itemWidth = $(this).outerWidth();
+          itemsWidth+=itemWidth;
+        });
+        return itemsWidth;
+      };
 
-    var widthOfList = function(){
-      var itemsWidth = 0;
-      $('.list li').each(function(){
-        var itemWidth = $(this).outerWidth();
-        itemsWidth+=itemWidth;
-      });
-      return itemsWidth;
-    };
+      var widthOfHidden = function(){
+        return (($('.wrapper').outerWidth())-widthOfList()-getLeftPosi())-scrollBarWidths;
+      };
 
-    var widthOfHidden = function(){
-      return -$('.wrapper').outerWidth();
-      //return (($('.wrapper').outerWidth())-widthOfList()-getLeftPosi())-scrollBarWidths;
-    };
+      var getLeftPosi = function(){
+        return $('.list').position().left;
+      };
 
-    var getLeftPosi = function(){
-      return $('.list').position().left;
-    };
-
-    var reAdjust = function(){
-      if (($('.wrapper').outerWidth()) < widthOfList()) {
+      var reAdjust = function(){
+        if (($('.wrapper').outerWidth()) < widthOfList()) {
         $('.scroller-right').show();
       }
       else {
         $('.scroller-right').hide();
       }
-    
+  
       if (getLeftPosi()<0) {
         $('.scroller-left').show();
       }
       else {
         $('.item').animate({left:"-="+getLeftPosi()+"px"},'slow');
-    	  $('.scroller-left').hide();
+        $('.scroller-left').hide();
       }
     }
 
     reAdjust();
 
     $(window).on('resize',function(e){  
-      	reAdjust();
+      reAdjust();
     });
 
     $('.scroller-right').click(function() {
-    
       $('.scroller-left').fadeIn('slow');
       $('.scroller-right').fadeOut('slow');
-    
+  
       $('.list').animate({left:"+="+widthOfHidden()+"px"},'slow',function(){
-
       });
     });
 
     $('.scroller-left').click(function() {
-    
-      $('.scroller-right').fadeIn('slow');
+	  $('.scroller-right').fadeIn('slow');
       $('.scroller-left').fadeOut('slow');
-    
+  
       $('.list').animate({left:"-="+getLeftPosi()+"px"},'slow',function(){
-    	
-      });
-    });        
+  	  });
+    });
+  });
   </script>
 </body>
 </html>

@@ -1,0 +1,231 @@
+diff --git a/WebContent/public/index.html b/WebContent/public/index.html
+index 01549da..1ad4eef 100644
+--- a/WebContent/public/index.html
++++ b/WebContent/public/index.html
+@@ -2,9 +2,9 @@
+ <head>
+   <meta charset="utf-8">
+   <title>College Basket Ball Odds</title>
+-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+-  <link rel="stylesheet" href="https://bootswatch.com/cosmo/bootstrap.min.css" />
+-  <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
++  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" .>
++  <script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
++  <script type='text/javascript' src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.js"></script>
+   <script type="text/javascript">
+     var App = angular.module('App', []);
+@@ -17,12 +17,12 @@
+       
+       $scope.eventDates = [];
+       
+-      for (var i=0; i<7; i++) {
++      for (var i=0; i<21; i++) {
+           var eventDate = new Date();
+-          eventDate.setDate(eventDate.getDate() - 3 + i);
++          eventDate.setDate(eventDate.getDate() - 15 + i);
+     	  $scope.eventDates.push({
+     		  date: eventDate,
+-    		  selected: (i === 3)
++    		  selected: (i === 15)
+     	  });
+    	  }
+       
+@@ -76,32 +76,32 @@
+     });
+ 
+   </script>
+-<style type="text/css">
++  <style type="text/css">
+ .wrapper {
+-    position:relative;
+-    margin:0 auto;
+-    overflow:hidden;
+-	padding:5px;
+-  	height:50px;
++  position:relative;
++  margin:0 auto;
++  overflow:hidden;
++  padding:5px;
++  height:65px;
+ }
+ 
+ .list {
+-    position:absolute;
+-    left:0px;
+-    top:0px;
+-  	min-width:3000px;
+-  	margin-left:12px;
+-    margin-top:0px;
++  position:absolute;
++  left:0px;
++  top:0px;
++  min-width:3000px;
++  margin-left:12px;
++  margin-top:0px;
+ }
+ 
+ .list li{
+-	display:table-cell;
+-    position:relative;
+-    text-align:center;
+-    cursor:grab;
+-    cursor:-webkit-grab;
+-    color:#efefef;
+-    vertical-align:middle;
++  display:table-cell;
++  position:relative;
++  text-align:center;
++  cursor:grab;
++  cursor:-webkit-grab;
++  color:#efefef;
++  vertical-align:middle;
+ }
+ 
+ .scroller {
+@@ -131,7 +131,9 @@
+       <div class="scroller scroller-right"><i class="glyphicon glyphicon-chevron-right"></i></div>
+       <div class="wrapper">
+         <ul class="nav nav-tabs list" id="myTab" >
+-          <li ng-class="{'active' : event.selected}" ng-repeat="event in eventDates"><a href="#" ng-click="loadMatchesByDate(event)">{{event.date | date:'MM/dd/yyyy'}}</a></li>
++          <li ng-class="{'active' : event.selected}" ng-repeat="event in eventDates">
++            <a href="#" class="text-uppercase" ng-click="loadMatchesByDate(event)">{{event.date | date:'dd'}}<br/>{{event.date | date:'MMM'}}</a>
++          </li>
+       </ul>
+       </div>
+     </div>
+@@ -158,70 +160,67 @@
+       </table>
+     </div> 
+   </div>
+-  <script type="text/javascript">
+-    var hidWidth;
+-    var scrollBarWidths = 40;
+-
+-    var widthOfList = function(){
+-      var itemsWidth = 0;
+-      $('.list li').each(function(){
+-        var itemWidth = $(this).outerWidth();
+-        itemsWidth+=itemWidth;
+-      });
+-      return itemsWidth;
+-    };
+-
+-    var widthOfHidden = function(){
+-      return -$('.wrapper').outerWidth();
+-      //return (($('.wrapper').outerWidth())-widthOfList()-getLeftPosi())-scrollBarWidths;
+-    };
+-
+-    var getLeftPosi = function(){
+-      return $('.list').position().left;
+-    };
+-
+-    var reAdjust = function(){
+-      if (($('.wrapper').outerWidth()) < widthOfList()) {
++  <script type='text/javascript'>
++        
++    $(document).ready(function() {
++      var hidWidth;
++      var scrollBarWidths = 40;
++      var widthOfList = function(){
++        var itemsWidth = 0;
++        $('.list li').each(function(){
++          var itemWidth = $(this).outerWidth();
++          itemsWidth+=itemWidth;
++        });
++        return itemsWidth;
++      };
++
++      var widthOfHidden = function(){
++        return (($('.wrapper').outerWidth())-widthOfList()-getLeftPosi())-scrollBarWidths;
++      };
++
++      var getLeftPosi = function(){
++        return $('.list').position().left;
++      };
++
++      var reAdjust = function(){
++        if (($('.wrapper').outerWidth()) < widthOfList()) {
+         $('.scroller-right').show();
+       }
+       else {
+         $('.scroller-right').hide();
+       }
+-    
++  
+       if (getLeftPosi()<0) {
+         $('.scroller-left').show();
+       }
+       else {
+         $('.item').animate({left:"-="+getLeftPosi()+"px"},'slow');
+-    	  $('.scroller-left').hide();
++        $('.scroller-left').hide();
+       }
+     }
+ 
+     reAdjust();
+ 
+     $(window).on('resize',function(e){  
+-      	reAdjust();
++      reAdjust();
+     });
+ 
+     $('.scroller-right').click(function() {
+-    
+       $('.scroller-left').fadeIn('slow');
+       $('.scroller-right').fadeOut('slow');
+-    
++  
+       $('.list').animate({left:"+="+widthOfHidden()+"px"},'slow',function(){
+-
+       });
+     });
+ 
+     $('.scroller-left').click(function() {
+-    
+-      $('.scroller-right').fadeIn('slow');
++	  $('.scroller-right').fadeIn('slow');
+       $('.scroller-left').fadeOut('slow');
+-    
++  
+       $('.list').animate({left:"-="+getLeftPosi()+"px"},'slow',function(){
+-    	
+-      });
+-    });        
++  	  });
++    });
++  });
+   </script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/src/com/scribble/nbacb/models/events/Event.java b/src/com/scribble/nbacb/models/events/Event.java
+index 32bdbf9..5c22b1c 100644
+--- a/src/com/scribble/nbacb/models/events/Event.java
++++ b/src/com/scribble/nbacb/models/events/Event.java
+@@ -7,7 +7,10 @@ import java.util.List;
+ import java.util.Map;
+ import javax.annotation.Generated;
+ 
++import org.codehaus.jackson.annotate.JsonIgnoreProperties;
++
+ @Generated("org.jsonschema2pojo")
++@JsonIgnoreProperties(ignoreUnknown = true)
+ public class Event {
+ 
+     private Colours colours;
+diff --git a/src/com/scribble/nbacb/models/standings/Standing.java b/src/com/scribble/nbacb/models/standings/Standing.java
+index 88b5f12..e7f6fb3 100644
+--- a/src/com/scribble/nbacb/models/standings/Standing.java
++++ b/src/com/scribble/nbacb/models/standings/Standing.java
+@@ -5,7 +5,10 @@ import java.util.HashMap;
+ import java.util.Map;
+ import javax.annotation.Generated;
+ 
++import org.codehaus.jackson.annotate.JsonIgnoreProperties;
++
+ @Generated("org.jsonschema2pojo")
++@JsonIgnoreProperties(ignoreUnknown = true)
+ public class Standing {
+ 
+     private Boolean clinched_conference;

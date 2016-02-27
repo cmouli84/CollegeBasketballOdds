@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 @Generated("org.jsonschema2pojo")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
 
     private Colours colours;
