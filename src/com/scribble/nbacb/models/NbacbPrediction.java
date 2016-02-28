@@ -1,5 +1,10 @@
 package com.scribble.nbacb.models;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public class NbacbPrediction implements Comparable<NbacbPrediction> {
 
 	private String homeTeamName;
@@ -138,7 +143,14 @@ public class NbacbPrediction implements Comparable<NbacbPrediction> {
 	@Override
 	public int compareTo(NbacbPrediction o) {
 		// TODO Auto-generated method stub
-        return gameDate.compareTo(o.getGameDate());
+		DateFormat dateFormat = new SimpleDateFormat("EEE MM/dd hh:mm a z", Locale.ENGLISH);
+        try {
+			return dateFormat.parse(gameDate).compareTo(dateFormat.parse(o.getGameDate()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return 0;
 	}
 	/**
 	 * @return the homeScore
