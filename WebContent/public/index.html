@@ -1,6 +1,7 @@
 <html ng-app="App">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>College Basket Ball Odds</title>
   <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://bootswatch.com/cosmo/bootstrap.min.css" />
@@ -131,8 +132,8 @@
   </style>
 </head>
 <body>
-  <div class="container-fluid" ng-controller="NbacbCtrl">  
-    <div class="container-fluid">
+  <div class="container" ng-controller="NbacbCtrl">  
+    <div>
       <div class="scroller scroller-left"><i class="glyphicon glyphicon-chevron-left"></i></div>
       <div class="scroller scroller-right"><i class="glyphicon glyphicon-chevron-right"></i></div>
       <div class="wrapper">
@@ -143,24 +144,30 @@
       </ul>
       </div>
     </div>
-    <div class="container">
+    <div>
       <table class="table table-striped col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <thead>
           <tr>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Match</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Home Team<br>Wins-Loses</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Away Team<br>Wins-Loses</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Westgate Odds</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Sonny Moore Odds</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Score<br />Home-Away</th>
+            <th class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Match</th>
+            <th class="col-lg-3 col-md-3 col-sm-3 col-xs-3">Westgate Odds</th>
+            <th class="col-lg-3 col-md-3 col-sm-3 col-xs-3">Sonny Moore Odds</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Score (Home-Away)</th>
           </tr>
         </thead>
         <tr ng-class="getSonnyMooreStatusClass(pick)" ng-repeat="pick in picks">
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><div class="small">{{pick.gameDate}}</div><strong>{{pick.awayTeamName}}<br>@{{pick.homeTeamName}}</strong></td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.homeWins}}-{{pick.homeLoses}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.awayWins}}-{{pick.awayLoses}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getSonnyMooreOdds(pick)}}</td>
+          <td class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+          	<div class="small">{{pick.gameDate}}</div>
+          	<div>
+            	<strong>{{pick.awayTeamName}} </strong>
+            	<small>({{pick.awayWins}}-{{pick.awayLoses}})</small>
+          	</div>
+          	<div>
+            	<strong>@{{pick.homeTeamName}} </strong> 
+            	<small>({{pick.homeWins}}-{{pick.homeLoses}})</small>
+          	</div>
+          </td>
+          <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
+          <td class="col-lg-3 col-md-3 col-sm-3 col-xs-3" style="vertical-align:middle">{{getSonnyMooreOdds(pick)}}</td>
           <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getGameScore(pick)}}</td>
         </tr>
       </table>
