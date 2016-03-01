@@ -76,13 +76,13 @@ public class CollegeBasketBallOddsService {
 			if (isPastEventDate)
 			{
 				EventPowerRanking eventPowerRanking = getEventPowerRankingById(eventPowerRankings, event.getId());
-				sonnyMooreOdds = (eventPowerRanking == null) 
+				sonnyMooreOdds = (eventPowerRanking == null || eventPowerRanking.getHomeTeamRanking() == 0 || eventPowerRanking.getAwayTeamRanking() == 0) 
 						? -999999
 						: Math.round((eventPowerRanking.getAwayTeamRanking() - eventPowerRanking.getHomeTeamRanking() - 3.25) * 100.0) / 100.0;
 			}
 			else
 			{	
-				sonnyMooreOdds = (homeTeamRanking == null || awayTeamRanking == null) 
+				sonnyMooreOdds = (homeTeamRanking == null || awayTeamRanking == null || homeTeamRanking.getPowerRanking() == 0 || awayTeamRanking.getPowerRanking() == 0) 
 						? -999999
 						: Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 3.25) * 100.0) / 100.0;
 			}
