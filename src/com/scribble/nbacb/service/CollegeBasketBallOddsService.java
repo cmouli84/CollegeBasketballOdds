@@ -20,6 +20,7 @@ import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.NbacbPrediction;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
+import com.scribble.nbacb.models.schedule.Season;
 import com.scribble.nbacb.repository.ICollegeBasketBallOddsRepository;
 
 @Service
@@ -37,7 +38,8 @@ public class CollegeBasketBallOddsService {
 		
 		Boolean isPastEventDate = getIsPastDate(matchDate);
 		
-		List<Event> events = nbacbRepository.getEventsByDate(matchDate, isPastEventDate); 
+		Season season = nbacbRepository.getSchedule();
+		List<Event> events = nbacbRepository.getEventsByDate(matchDate, season, isPastEventDate); 
 		
 		//List<Standing> standings = nbacbRepository.getTeamStandings();
 		

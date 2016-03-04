@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Repository;
 
 import com.google.common.cache.Cache;
@@ -18,6 +19,7 @@ import com.google.common.cache.CacheBuilder;
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
+import com.scribble.nbacb.models.schedule.Season;
 import com.scribble.nbacb.models.standings.Standing;
 
 
@@ -31,6 +33,8 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 	private Cache<String, List<PowerRanking>> powerRankingsCache;
 	
 	private Cache<String, List<EventPowerRanking>> eventPowerRankingsCache;
+	
+	private Cache<String, Season> seasonCache;
 	
 	private Map<String, String> eventsCacheKeys = new HashMap<String, String>();
 	
@@ -65,10 +69,31 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 			    .maximumSize(10000)
 			    .expireAfterWrite(7, TimeUnit.DAYS)
 			    .build();
+
+		seasonCache = CacheBuilder.newBuilder()
+			    .concurrencyLevel(4)
+			    .weakKeys()
+			    .maximumSize(10000)
+			    .expireAfterWrite(6, TimeUnit.HOURS)
+			    .build();
+	}
+
+	@Override
+	public Season getSchedule() throws MalformedURLException, IOException {
+		Season season = seasonCache.getIfPresent("SCHEDULE");
+		
+		if (season == null)
+		{
+			season = super.getSchedule();
+			seasonCache.put("SCHEDULE", season);
+		}
+		
+		// TODO Auto-generated method stub
+		return season;
 	}
 	
 	@Override
-	public List<Event> getEventsByDate(Date eventDate, Boolean isPastEventDate) throws MalformedURLException, IOException {
+	public List<Event> getEventsByDate(Date eventDate, Season season, Boolean isPastEventDate) throws MalformedURLException, IOException {
 		// TODO Auto-generated method stub
 		String formattedDate = new SimpleDateFormat("yyyyMMddz").format(eventDate);
 		if (!eventsCacheKeys.containsKey(formattedDate))
@@ -83,7 +108,7 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 		System.out.println(cacheKey);
 		if (events == null)
 		{
-			events = super.getEventsByDate(eventDate, isPastEventDate);
+			events = super.getEventsByDate(eventDate, season, isPastEventDate);
 			cache.put(cacheKey, events);
 		}
 		

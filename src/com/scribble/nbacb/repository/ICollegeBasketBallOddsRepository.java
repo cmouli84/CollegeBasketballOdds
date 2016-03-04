@@ -11,11 +11,14 @@ import java.util.Map;
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.events.Event;
+import com.scribble.nbacb.models.schedule.Season;
 import com.scribble.nbacb.models.standings.Standing;
 
 public interface ICollegeBasketBallOddsRepository {
-	
-	List<Event> getEventsByDate(Date eventDate, Boolean isPastEventDate) throws MalformedURLException, IOException;
+		
+	Season getSchedule() throws MalformedURLException, IOException;
+
+	List<Event> getEventsByDate(Date eventDate, Season season, Boolean isPastEventDate) throws MalformedURLException, IOException;
 
 	List<Standing> getTeamStandings() throws MalformedURLException, IOException;
 	
