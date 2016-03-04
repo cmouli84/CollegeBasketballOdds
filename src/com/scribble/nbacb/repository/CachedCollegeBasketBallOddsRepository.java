@@ -19,6 +19,7 @@ import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
 import com.scribble.nbacb.models.TeamRecord;
 import com.scribble.nbacb.models.events.Event;
+import com.scribble.nbacb.models.schedule.Season;
 import com.scribble.nbacb.models.standings.Standing;
 import com.scribble.nbacb.utilities.Utility;
 
@@ -36,6 +37,8 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 	
 	private Cache<String, Map<String, List<TeamRecord>>> teamHistoryCache;
 
+	private Cache<String, Season> seasonCache;
+	
 	private Map<String, String> eventsCacheKeys = new HashMap<String, String>();
 	
 	private Map<String, String> eventsPowerRankingsCacheKeys = new HashMap<String, String>();	
@@ -76,10 +79,31 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 			    .maximumSize(10000)
 			    .expireAfterWrite(1, TimeUnit.DAYS)
 			    .build();
+
+		seasonCache = CacheBuilder.newBuilder()
+			    .concurrencyLevel(4)
+			    .weakKeys()
+			    .maximumSize(10000)
+			    .expireAfterWrite(6, TimeUnit.HOURS)
+			    .build();
 	}
 	
 	@Override
-	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException {
+	public Season getSchedule() throws MalformedURLException, IOException {
+		Season season = seasonCache.getIfPresent("SCHEDULE");
+		
+		if (season == null)
+		{
+			season = super.getSchedule();
+			seasonCache.put("SCHEDULE", season);
+		}
+		
+		// TODO Auto-generated method stub
+		return season;
+	}
+	
+	@Override
+	public List<Event> getEventsByDate(Date eventDate, Season season) throws MalformedURLException, IOException {
 		// TODO Auto-generated method stub
 		String formattedDate = new SimpleDateFormat("yyyyMMddz").format(eventDate);
 		if (!eventsCacheKeys.containsKey(formattedDate))
@@ -94,7 +118,7 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 		System.out.println(cacheKey);
 		if (events == null)
 		{
-			events = super.getEventsByDate(eventDate);
+			events = super.getEventsByDate(eventDate, season);
 			cache.put(cacheKey, events);
 		}
 		

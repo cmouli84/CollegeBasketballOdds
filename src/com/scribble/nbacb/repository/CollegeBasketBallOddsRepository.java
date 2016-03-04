@@ -43,19 +43,16 @@ import com.scribble.nbacb.models.standings.Standing;
 @Repository("Realtime")
 public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRepository {
 
-	private Season season;
-	
-	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException
-	{
-		if (season == null)
-		{
-			String scheduleUrl = "http://api.thescore.com/ncaab/schedule";
-			ObjectMapper mapper = new ObjectMapper();
-			
-			String scheduleResponse = getWebResponse(scheduleUrl);
-			season = mapper.readValue(scheduleResponse, Season.class);
-		}
+	public Season getSchedule() throws MalformedURLException, IOException {
+		String scheduleUrl = "http://api.thescore.com/ncaab/schedule";
+		ObjectMapper mapper = new ObjectMapper();
 		
+		String scheduleResponse = getWebResponse(scheduleUrl);
+		return mapper.readValue(scheduleResponse, Season.class);
+	}
+
+	public List<Event> getEventsByDate(Date eventDate, Season season) throws MalformedURLException, IOException
+	{
 		List<Event> matches = new ArrayList<>();
 		Calendar toDateCalendar = Calendar.getInstance();
 		toDateCalendar.setTime(eventDate);
