@@ -86,6 +86,13 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 			    .maximumSize(10000)
 			    .expireAfterWrite(6, TimeUnit.HOURS)
 			    .build();
+
+		teamHistoryCache = CacheBuilder.newBuilder()
+			    .concurrencyLevel(4)
+			    .weakKeys()
+			    .maximumSize(10000)
+			    .expireAfterWrite(1, TimeUnit.DAYS)
+			    .build();
 	}
 	
 	@Override

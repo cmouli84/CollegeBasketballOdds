@@ -16,7 +16,6 @@ import com.scribble.nbacb.models.schedule.Season;
 import com.scribble.nbacb.models.standings.Standing;
 
 public interface ICollegeBasketBallOddsRepository {
-		
 	Season getSchedule() throws MalformedURLException, IOException;
 
 	List<Event> getEventsByDate(Date eventDate, Season season) throws MalformedURLException, IOException;

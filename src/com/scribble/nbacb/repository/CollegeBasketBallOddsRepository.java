@@ -46,11 +46,10 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 	public Season getSchedule() throws MalformedURLException, IOException {
 		String scheduleUrl = "http://api.thescore.com/ncaab/schedule";
 		ObjectMapper mapper = new ObjectMapper();
-		
+
 		String scheduleResponse = getWebResponse(scheduleUrl);
 		return mapper.readValue(scheduleResponse, Season.class);
 	}
-
 	public List<Event> getEventsByDate(Date eventDate, Season season) throws MalformedURLException, IOException
 	{
 		List<Event> matches = new ArrayList<>();
