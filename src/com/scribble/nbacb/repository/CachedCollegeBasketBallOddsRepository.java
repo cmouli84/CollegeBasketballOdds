@@ -17,8 +17,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
+import com.scribble.nbacb.models.TeamRecord;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.models.standings.Standing;
+import com.scribble.nbacb.utilities.Utility;
 
 
 @Repository("Cached")
@@ -32,9 +34,11 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 	
 	private Cache<String, List<EventPowerRanking>> eventPowerRankingsCache;
 	
+	private Cache<String, Map<String, List<TeamRecord>>> teamHistoryCache;
+
 	private Map<String, String> eventsCacheKeys = new HashMap<String, String>();
 	
-	private Map<String, String> eventsPowerRankingsCacheKeys = new HashMap<String, String>();
+	private Map<String, String> eventsPowerRankingsCacheKeys = new HashMap<String, String>();	
 	
 	public CachedCollegeBasketBallOddsRepository() {
 		// TODO Auto-generated constructor stub
@@ -65,10 +69,17 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 			    .maximumSize(10000)
 			    .expireAfterWrite(7, TimeUnit.DAYS)
 			    .build();
+
+		teamHistoryCache = CacheBuilder.newBuilder()
+			    .concurrencyLevel(4)
+			    .weakKeys()
+			    .maximumSize(10000)
+			    .expireAfterWrite(1, TimeUnit.DAYS)
+			    .build();
 	}
 	
 	@Override
-	public List<Event> getEventsByDate(Date eventDate, Boolean isPastEventDate) throws MalformedURLException, IOException {
+	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException {
 		// TODO Auto-generated method stub
 		String formattedDate = new SimpleDateFormat("yyyyMMddz").format(eventDate);
 		if (!eventsCacheKeys.containsKey(formattedDate))
@@ -77,13 +88,13 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 		}
 		String cacheKey = eventsCacheKeys.get(formattedDate);
 		
-		Cache<String, List<Event>> cache = isPastEventDate ? eventsCachePermanent : eventsCache;
+		Cache<String, List<Event>> cache = Utility.isPastDate(eventDate) ? eventsCachePermanent : eventsCache;
 		List<Event> events = cache.getIfPresent(cacheKey);
 		
 		System.out.println(cacheKey);
 		if (events == null)
 		{
-			events = super.getEventsByDate(eventDate, isPastEventDate);
+			events = super.getEventsByDate(eventDate);
 			cache.put(cacheKey, events);
 		}
 		
@@ -136,6 +147,33 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 	public Map<String, String> getScoreApiAndSonnyMooreTeamMapping() {
 		// TODO Auto-generated method stub
 		return super.getScoreApiAndSonnyMooreTeamMapping();
+	}
+	
+	@Override
+	public Map<String, List<TeamRecord>> getTeamRecords(Date matchDate, List<Event> events) {
+		
+		if (!Utility.isToday(matchDate))
+		{
+			return null;
+		}
+
+		String formattedDate = new SimpleDateFormat("yyyyMMddz").format(matchDate);
+		if (!eventsCacheKeys.containsKey(formattedDate))
+		{
+			eventsCacheKeys.put(formattedDate, formattedDate);
+		}
+		String cacheKey = eventsCacheKeys.get(formattedDate);
+		
+		Map<String, List<TeamRecord>> teamHistory = teamHistoryCache.getIfPresent(cacheKey);
+		
+		System.out.println(cacheKey);
+		if (teamHistory == null)
+		{
+			teamHistory = super.getTeamRecords(matchDate, events);
+			teamHistoryCache.put(cacheKey, teamHistory);
+		}
+		
+		return teamHistory;
 	}
 
 }

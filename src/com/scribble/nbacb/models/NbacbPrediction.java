@@ -19,6 +19,8 @@ public class NbacbPrediction implements Comparable<NbacbPrediction> {
 	private String gameDate;
 	private Integer homeScore;
 	private Integer awayScore;
+	private TeamRecord homeRecord;
+	private TeamRecord awayRecord;
 	/**
 	 * @return the homeTeamName
 	 */
@@ -175,6 +177,30 @@ public class NbacbPrediction implements Comparable<NbacbPrediction> {
 	 */
 	public void setAwayScore(Integer awayScore) {
 		this.awayScore = awayScore;
+	}
+	/**
+	 * @return the homeRecord
+	 */
+	public TeamRecord getHomeRecord() {
+		return homeRecord;
+	}
+	/**
+	 * @param homeRecord the homeRecord to set
+	 */
+	public void setHomeRecord(TeamRecord homeRecord) {
+		this.homeRecord = homeRecord;
+	}
+	/**
+	 * @return the awayRecord
+	 */
+	public TeamRecord getAwayRecord() {
+		return awayRecord;
+	}
+	/**
+	 * @param awayRecord the awayRecord to set
+	 */
+	public void setAwayRecord(TeamRecord awayRecord) {
+		this.awayRecord = awayRecord;
 	}
 
 	

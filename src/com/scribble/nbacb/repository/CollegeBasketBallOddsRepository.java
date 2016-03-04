@@ -34,6 +34,7 @@ import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
+import com.scribble.nbacb.models.TeamRecord;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.models.schedule.Current_season;
 import com.scribble.nbacb.models.schedule.Season;
@@ -44,7 +45,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 
 	private Season season;
 	
-	public List<Event> getEventsByDate(Date eventDate, Boolean isPastEventDate) throws MalformedURLException, IOException
+	public List<Event> getEventsByDate(Date eventDate) throws MalformedURLException, IOException
 	{
 		if (season == null)
 		{
@@ -618,6 +619,11 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		String formattedTeamName = teamName.trim().toUpperCase();
 		
 		return formattedTeamName;
+	}
+
+	public Map<String, List<TeamRecord>> getTeamRecords(Date matchDate, List<Event> events) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

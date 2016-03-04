@@ -5,7 +5,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -19,8 +18,10 @@ import org.springframework.stereotype.Service;
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.NbacbPrediction;
 import com.scribble.nbacb.models.PowerRanking;
+import com.scribble.nbacb.models.TeamRecord;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.repository.ICollegeBasketBallOddsRepository;
+import com.scribble.nbacb.utilities.Utility;
 
 @Service
 public class CollegeBasketBallOddsService {
@@ -35,9 +36,9 @@ public class CollegeBasketBallOddsService {
 		
 		List<NbacbPrediction> nbacbPredictions = new ArrayList<>();
 		
-		Boolean isPastEventDate = getIsPastDate(matchDate);
+		Boolean isPastEventDate = Utility.isPastDate(matchDate);
 		
-		List<Event> events = nbacbRepository.getEventsByDate(matchDate, isPastEventDate); 
+		List<Event> events = nbacbRepository.getEventsByDate(matchDate); 
 		
 		//List<Standing> standings = nbacbRepository.getTeamStandings();
 		
@@ -48,6 +49,8 @@ public class CollegeBasketBallOddsService {
 		{
 			eventPowerRankings = nbacbRepository.getSonnyMooreEventsByDate(matchDate, events);
 		}
+		
+		List<TeamRecord> teamRecords = new ArrayList<>();
 		
 		Map<String, String> teamMappings = nbacbRepository.getScoreApiAndSonnyMooreTeamMapping();
 		
@@ -115,16 +118,6 @@ public class CollegeBasketBallOddsService {
 		return nbacbPredictions;
 	}
 
-	private Boolean getIsPastDate(Date matchDate) {
-		Calendar matchDateCalendar = Calendar.getInstance();
-		matchDateCalendar.setTime(matchDate);
-		Calendar currentDateCalendar = Calendar.getInstance();
-		return (matchDateCalendar.get(Calendar.YEAR) < currentDateCalendar.get(Calendar.YEAR))
-				|| (matchDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR) && matchDateCalendar.get(Calendar.MONTH) < currentDateCalendar.get(Calendar.MONTH))
-				|| (matchDateCalendar.get(Calendar.YEAR) == currentDateCalendar.get(Calendar.YEAR) 
-					&& matchDateCalendar.get(Calendar.MONTH) == currentDateCalendar.get(Calendar.MONTH) && matchDateCalendar.get(Calendar.DATE) < currentDateCalendar.get(Calendar.DATE));
-	}
-	
 	/*private Standing getTeamStanding(String teamName, List<Standing> standings)
 	{
 		for (Standing standing: standings)
