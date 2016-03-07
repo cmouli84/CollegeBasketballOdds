@@ -52,7 +52,7 @@ public class CollegeBasketBallOddsService {
 			eventPowerRankings = nbacbRepository.getSonnyMooreEventsByDate(matchDate, events);
 		}
 		
-		List<TeamRecord> teamRecords = new ArrayList<>();
+		Map<String, TeamRecord> teamRecords = nbacbRepository.getTeamRecords(matchDate, events);
 		
 		Map<String, String> teamMappings = nbacbRepository.getScoreApiAndSonnyMooreTeamMapping();
 		
@@ -112,6 +112,8 @@ public class CollegeBasketBallOddsService {
 						? -999999 : event.getBox_score().getScore().getHome().getScore());
 				setAwayScore(((eventDate.getTime() > currentDate.getTime()) || (event.getBox_score() == null) || (event.getBox_score().getScore() == null)) 
 						? -999999 : event.getBox_score().getScore().getAway().getScore());
+				setHomeRecord((teamRecords == null) ? null : teamRecords.get(scoreApiHomeTeamName));
+				setAwayRecord((teamRecords == null) ? null : teamRecords.get(scoreApiAwayTeamName));
 			}});
 		}
 		

@@ -28,5 +28,5 @@ public interface ICollegeBasketBallOddsRepository {
 	
 	Map<String, String> getScoreApiAndSonnyMooreTeamMapping();
 
-	Map<String, List<TeamRecord>> getTeamRecords(Date matchDate, List<Event> events);
+	Map<String, TeamRecord> getTeamRecords(Date matchDate, List<Event> events) throws UnknownHostException;
 }

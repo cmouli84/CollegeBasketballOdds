@@ -35,7 +35,7 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 	
 	private Cache<String, List<EventPowerRanking>> eventPowerRankingsCache;
 	
-	private Cache<String, Map<String, List<TeamRecord>>> teamHistoryCache;
+	private Cache<String, Map<String, TeamRecord>> teamHistoryCache;
 
 	private Cache<String, Season> seasonCache;
 	
@@ -85,13 +85,6 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 			    .weakKeys()
 			    .maximumSize(10000)
 			    .expireAfterWrite(6, TimeUnit.HOURS)
-			    .build();
-
-		teamHistoryCache = CacheBuilder.newBuilder()
-			    .concurrencyLevel(4)
-			    .weakKeys()
-			    .maximumSize(10000)
-			    .expireAfterWrite(1, TimeUnit.DAYS)
 			    .build();
 	}
 	
@@ -181,8 +174,8 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 	}
 	
 	@Override
-	public Map<String, List<TeamRecord>> getTeamRecords(Date matchDate, List<Event> events) {
-		
+	public Map<String, TeamRecord> getTeamRecords(Date matchDate, List<Event> events) throws UnknownHostException
+	{
 		if (!Utility.isToday(matchDate))
 		{
 			return null;
@@ -195,7 +188,7 @@ public class CachedCollegeBasketBallOddsRepository extends CollegeBasketBallOdds
 		}
 		String cacheKey = eventsCacheKeys.get(formattedDate);
 		
-		Map<String, List<TeamRecord>> teamHistory = teamHistoryCache.getIfPresent(cacheKey);
+		Map<String, TeamRecord> teamHistory = teamHistoryCache.getIfPresent(cacheKey);
 		
 		System.out.println(cacheKey);
 		if (teamHistory == null)

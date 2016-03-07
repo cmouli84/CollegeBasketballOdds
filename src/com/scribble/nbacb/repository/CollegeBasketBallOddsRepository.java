@@ -30,10 +30,14 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
+import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
+import com.scribble.nbacb.models.TeamEvent;
 import com.scribble.nbacb.models.TeamRecord;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.models.schedule.Current_season;
@@ -50,6 +54,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		String scheduleResponse = getWebResponse(scheduleUrl);
 		return mapper.readValue(scheduleResponse, Season.class);
 	}
+	
 	public List<Event> getEventsByDate(Date eventDate, Season season) throws MalformedURLException, IOException
 	{
 		List<Event> matches = new ArrayList<>();
@@ -158,16 +163,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		
 		List<EventPowerRanking> eventPowerRankings = new ArrayList<>();
 
-		ClientConfiguration clientConfiguration = new ClientConfiguration();
-		if (InetAddress.getLocalHost().getHostName().toUpperCase().equals("V00972473"))
-		{
-			clientConfiguration.setProxyHost("webproxysea.nordstrom.net");
-			clientConfiguration.setProxyPort(8181);
-		}
-		
-		AmazonDynamoDB amazonDynamoDb = new AmazonDynamoDBClient(clientConfiguration).<AmazonDynamoDBClient>withRegion(Regions.US_WEST_2);
-		
-        DynamoDB dynamoDb = new DynamoDB(amazonDynamoDb);
+		DynamoDB dynamoDb = getDynamoDbInstance();
 
         Table teams = dynamoDb.getTable("Events");
 
@@ -196,6 +192,20 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
         }
 		
 		return eventPowerRankings;
+	}
+
+	private DynamoDB getDynamoDbInstance() throws UnknownHostException {
+		ClientConfiguration clientConfiguration = new ClientConfiguration();
+		if (InetAddress.getLocalHost().getHostName().toUpperCase().equals("V00972473"))
+		{
+			clientConfiguration.setProxyHost("webproxysea.nordstrom.net");
+			clientConfiguration.setProxyPort(8181);
+		}
+		
+		AmazonDynamoDB amazonDynamoDb = new AmazonDynamoDBClient(clientConfiguration).<AmazonDynamoDBClient>withRegion(Regions.US_WEST_2);
+		
+        DynamoDB dynamoDb = new DynamoDB(amazonDynamoDb);
+		return dynamoDb;
 	}
 	
 	public Map<String, String> getScoreApiAndSonnyMooreTeamMapping()
@@ -617,9 +627,56 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		return formattedTeamName;
 	}
 
-	public Map<String, List<TeamRecord>> getTeamRecords(Date matchDate, List<Event> events) {
+	public Map<String, TeamRecord> getTeamRecords(Date matchDate, List<Event> events) throws UnknownHostException
+	{
+		Map<String, TeamRecord> teamRecords = new HashMap<>();
+
+		DynamoDB dynamoDb = getDynamoDbInstance();
+        Table eventsTable = dynamoDb.getTable("Events");
+
+        ScanSpec spec = new ScanSpec();
+
+		for (Event event: events)
+		{
+			teamRecords.put(event.getAway_team().getFull_name(), new TeamRecord() {{ setEvents(new ArrayList<>());}});
+			teamRecords.put(event.getAway_team().getFull_name(), new TeamRecord() {{ setEvents(new ArrayList<>());}});
+		}
+		
+        ItemCollection<ScanOutcome> outcome = eventsTable.scan(spec);
+        
+        for (Item item: outcome)
+        {
+        	String teamName = item.getString("HomeTeamName");
+    		TeamRecord teamRecord = teamRecords.get(teamName);
+        	if (teamRecord != null)
+        	{
+        		teamRecord.getEvents().add(new TeamEvent() {{
+        			setOpponentTeamName(item.getString("AwayTeamName"));
+        			setEventAtHome(true);
+        			setHomeOdds(item.get("HomeOdds") == null ? -999999 : item.getDouble("HomeOdds"));
+        			setHomeScore(item.get("HomeScore") == null ? -999999 : item.getInt("HomeScore"));
+        			setAwayScore(item.get("AwayScore") == null ? -999999 : item.getInt("AwayScore"));
+        		}});
+        	}
+        	
+        	teamName = item.getString("AwayTeamName");
+    		teamRecord = teamRecords.get(teamName);
+        	if (teamRecord != null)
+        	{
+        		teamRecord.getEvents().add(new TeamEvent() {{
+        			setOpponentTeamName(item.getString("HomeTeamName"));
+        			setEventAtHome(false);
+        			setHomeOdds(item.get("HomeOdds") == null ? -999999 : item.getDouble("HomeOdds"));
+        			setHomeScore(item.get("HomeScore") == null ? -999999 : item.getInt("HomeScore"));
+        			setAwayScore(item.get("AwayScore") == null ? -999999 : item.getInt("AwayScore"));
+        		}});
+        	}
+        	
+        	
+        }
+        
 		// TODO Auto-generated method stub
-		return null;
+		return teamRecords;
 	}
 	
 }
