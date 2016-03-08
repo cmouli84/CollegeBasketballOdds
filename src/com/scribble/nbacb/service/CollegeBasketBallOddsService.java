@@ -78,15 +78,21 @@ public class CollegeBasketBallOddsService {
 			PowerRanking awayTeamRanking = teamMappings.get(scoreApiAwayTeamName) == null 
 					? null : getMatchingTeamName(powerRankings, teamMappings.get(scoreApiAwayTeamName));
 			Double sonnyMooreOdds;
+			Double homeTeamSonnyMooreRanking;
+			Double awayTeamSonnyMooreRanking;
 			if (isPastEventDate)
 			{
 				EventPowerRanking eventPowerRanking = getEventPowerRankingById(eventPowerRankings, event.getId());
+				homeTeamSonnyMooreRanking = (eventPowerRanking == null || eventPowerRanking.getHomeTeamRanking() == 0) ? -999999 : eventPowerRanking.getHomeTeamRanking();
+				awayTeamSonnyMooreRanking = (eventPowerRanking == null || eventPowerRanking.getAwayTeamRanking() == 0) ? -999999 : eventPowerRanking.getAwayTeamRanking();
 				sonnyMooreOdds = (eventPowerRanking == null || eventPowerRanking.getHomeTeamRanking() == 0 || eventPowerRanking.getAwayTeamRanking() == 0) 
 						? -999999
 						: Math.round((eventPowerRanking.getAwayTeamRanking() - eventPowerRanking.getHomeTeamRanking() - 3.25) * 100.0) / 100.0;
 			}
 			else
 			{	
+				homeTeamSonnyMooreRanking = (homeTeamRanking == null || homeTeamRanking.getPowerRanking() == 0) ? -999999 : homeTeamRanking.getPowerRanking();
+				awayTeamSonnyMooreRanking = (awayTeamRanking == null || awayTeamRanking.getPowerRanking() == 0) ? -999999 : awayTeamRanking.getPowerRanking();
 				sonnyMooreOdds = (homeTeamRanking == null || awayTeamRanking == null || homeTeamRanking.getPowerRanking() == 0 || awayTeamRanking.getPowerRanking() == 0) 
 						? -999999
 						: Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 3.25) * 100.0) / 100.0;
@@ -108,6 +114,8 @@ public class CollegeBasketBallOddsService {
 				setGameDate(new SimpleDateFormat("EEE MM/dd hh:mm a z").format(eventDate));
 				setWestgateCurrentPointSpread(currentOdd);
 				setSonnyMoorePointSpread(sonnyMooreOdds);
+				setHomeTeamSonnyMoorePowerRanking(homeTeamSonnyMooreRanking);
+				setAwayTeamSonnyMoorePowerRanking(awayTeamSonnyMooreRanking);
 				setHomeScore(((eventDate.getTime() > currentDate.getTime()) || (event.getBox_score() == null) || (event.getBox_score().getScore() == null)) 
 						? -999999 : event.getBox_score().getScore().getHome().getScore());
 				setAwayScore(((eventDate.getTime() > currentDate.getTime()) || (event.getBox_score() == null) || (event.getBox_score().getScore() == null)) 

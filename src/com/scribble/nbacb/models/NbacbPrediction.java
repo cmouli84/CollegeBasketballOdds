@@ -15,6 +15,8 @@ public class NbacbPrediction implements Comparable<NbacbPrediction> {
 	private Integer awayLoses;
 	private Double westgateCurrentPointSpread;
 	private Double westgateOpeningPointSpread;
+	private Double homeTeamSonnyMoorePowerRanking;
+	private Double awayTeamSonnyMoorePowerRanking;
 	private Double sonnyMoorePointSpread;
 	private String gameDate;
 	private Integer homeScore;
@@ -201,6 +203,30 @@ public class NbacbPrediction implements Comparable<NbacbPrediction> {
 	 */
 	public void setAwayRecord(TeamRecord awayRecord) {
 		this.awayRecord = awayRecord;
+	}
+	/**
+	 * @return the homeTeamSonnyMoorePowerRanking
+	 */
+	public Double getHomeTeamSonnyMoorePowerRanking() {
+		return homeTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @param homeTeamSonnyMoorePowerRanking the homeTeamSonnyMoorePowerRanking to set
+	 */
+	public void setHomeTeamSonnyMoorePowerRanking(Double homeTeamSonnyMoorePowerRanking) {
+		this.homeTeamSonnyMoorePowerRanking = homeTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @return the awayTeamSonnyMoorePowerRanking
+	 */
+	public Double getAwayTeamSonnyMoorePowerRanking() {
+		return awayTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @param awayTeamSonnyMoorePowerRanking the awayTeamSonnyMoorePowerRanking to set
+	 */
+	public void setAwayTeamSonnyMoorePowerRanking(Double awayTeamSonnyMoorePowerRanking) {
+		this.awayTeamSonnyMoorePowerRanking = awayTeamSonnyMoorePowerRanking;
 	}
 
 	

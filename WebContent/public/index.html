@@ -31,6 +31,17 @@
     	  return (westGatePointSpread === -999999) ? "Not Available" : westGatePointSpread;
       }
       
+      $scope.getSonnyMoorePowerRanking  = function(pick) {
+    	  return ((pick.homeTeamSonnyMoorePowerRanking === -999999 || pick.awayTeamSonnyMoorePowerRanking === -999999) 
+    	  		? "N/A" 
+    	  		: Math.round((pick.awayTeamSonnyMoorePowerRanking - pick.homeTeamSonnyMoorePowerRanking) * 100.0)/100.0)
+    	  		+ " ("
+    	  		+ (pick.awayTeamSonnyMoorePowerRanking === -999999 ? "N/A" : pick.awayTeamSonnyMoorePowerRanking)
+    	  		+ " - "
+    	  		+ (pick.homeTeamSonnyMoorePowerRanking === -999999 ? "N/A" : pick.homeTeamSonnyMoorePowerRanking)
+    	  		+ ")";
+      }
+      
       $scope.getGameScore = function(pick) {
     	  return (pick.homeScore === -999999) ? "Not Started" : pick.homeScore + "-" + pick.awayScore;
       }
@@ -147,14 +158,15 @@
       <table class="table table-striped col-lg-6 col-md-6 col-sm-9 col-xs-12">
         <thead>
           <tr>
-            <th class="col-lg-3 col-md-3 col-sm-3 col-xs-4">Match</th>
-            <th class="col-lg-1 col-md-1 col-sm-2 col-xs-3">Westgate Odds</th>
-            <th class="col-lg-1 col-md-1 col-sm-2 col-xs-3">Sonny Moore Odds</th>
-            <th class="col-lg-1 col-md-1 col-sm-2 col-xs-2">Score (Home-Away)</th>
+            <th class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Match</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Westgate Odds</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Sonny Moore Odds</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Ranking Diff (A-H)</th>
+            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Score (Home-Away)</th>
           </tr>
         </thead>
         <tr ng-class="getSonnyMooreStatusClass(pick)" ng-repeat="pick in picks">
-          <td class="col-lg-3 col-md-3 col-sm-3 col-xs-4">
+          <td class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
           	<div class="small">{{pick.gameDate}}</div>
           	<div>
             	<strong>{{pick.awayTeamName}} </strong>
@@ -165,9 +177,10 @@
             	<small>({{pick.homeWins}}-{{pick.homeLoses}})</small>
           	</div>
           </td>
-          <td class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
-          <td class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="vertical-align:middle">{{getSonnyMooreOdds(pick)}}</td>
-          <td class="col-lg-1 col-md-1 col-sm-2 col-xs-2" style="vertical-align:middle">{{getGameScore(pick)}}</td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getSonnyMooreOdds(pick)}}</td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getSonnyMoorePowerRanking(pick)}}</td>
+          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getGameScore(pick)}}</td>
         </tr>
       </table>
     </div> 
