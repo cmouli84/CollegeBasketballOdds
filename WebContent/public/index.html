@@ -66,9 +66,9 @@
     		  if ((((pick.awayScore - pick.homeScore) > pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread > pick.westgateCurrentPointSpread)) 
     				  || (((pick.awayScore - pick.homeScore) < pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread < pick.westgateCurrentPointSpread))) 
    			  {
-   			  		return "success";
+   			  		return "positive";
    			  }
-			  return "danger";
+			  return "negative";
    		  }
     	  
     	  return "";
@@ -139,11 +139,23 @@
 .scroller-left {
   float:left;
 }
+
+.parent {
+    line-height:65px; 
+}
+.positive {
+    background-color:#3FB618;
+    color:#fff;
+}
+.negative {
+    background-color:#FF0039;
+    color:#fff;
+}
   </style>
 </head>
 <body>
-  <div class="container" ng-controller="NbacbCtrl">  
-    <div>
+  <div ng-controller="NbacbCtrl">  
+    <div class="container">
       <div class="scroller scroller-left"><i class="glyphicon glyphicon-chevron-left"></i></div>
       <div class="scroller scroller-right"><i class="glyphicon glyphicon-chevron-right"></i></div>
       <div class="wrapper">
@@ -154,35 +166,39 @@
       </ul>
       </div>
     </div>
-    <div>
-      <table class="table table-striped col-lg-6 col-md-6 col-sm-9 col-xs-12">
-        <thead>
-          <tr>
-            <th class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Match</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Westgate Odds</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Sonny Moore Odds</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Rating Diff (A-H)</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Score (Home-Away)</th>
-          </tr>
-        </thead>
-        <tr ng-class="getSonnyMooreStatusClass(pick)" ng-repeat="pick in picks">
-          <td class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-          	<div class="small">{{pick.gameDate}}</div>
-          	<div>
-            	<strong>{{pick.awayTeamName}} </strong>
-            	<small>({{pick.awayWins}}-{{pick.awayLoses}})</small>
-          	</div>
-          	<div>
-            	<strong>@{{pick.homeTeamName}} </strong> 
-            	<small>({{pick.homeWins}}-{{pick.homeLoses}})</small>
-          	</div>
-          </td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getSonnyMooreOdds(pick)}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getSonnyMoorePowerRanking(pick)}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getGameScore(pick)}}</td>
-        </tr>
-      </table>
+    <div class="container" style="padding: 10px; font-size: 16px">
+      <div class="row" style="padding: 5px 0px 5px 0px; border-bottom-style: solid; border-bottom-width: 1px">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"><strong>Match</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><strong>Westgate Odds</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><strong>Sonny Moore Odds</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><strong>Rating Diff (A-H)</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><strong>Score (Home-Away)</strong></div>
+      </div>
+      <div class="row" style="padding: 5px 0px 5px 0px; border-bottom-style: solid; border-bottom-width: 1px" ng-class="getSonnyMooreStatusClass(pick)" ng-repeat="pick in picks">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+          <div class="small">{{pick.gameDate}}</div>
+          <div>
+            <strong>{{pick.awayTeamName}} </strong>
+            <small>({{pick.awayWins}}-{{pick.awayLoses}})</small>
+          </div>
+          <div>
+           	<strong>@{{pick.homeTeamName}} </strong> 
+            <small>({{pick.homeWins}}-{{pick.homeLoses}})</small>
+          </div>
+        </div>
+        <div class="parent col-lg-2 col-md-2 col-sm-2 col-xs-2">
+          {{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}
+        </div>
+        <div class="parent col-lg-2 col-md-2 col-sm-2 col-xs-2">
+          {{getSonnyMooreOdds(pick)}}
+        </div>
+        <div class="parent col-lg-2 col-md-2 col-sm-2 col-xs-2">
+          {{getSonnyMoorePowerRanking(pick)}}
+        </div>
+        <div class="parent col-lg-2 col-md-2 col-sm-2 col-xs-2">
+          {{getGameScore(pick)}}
+        </div>
+      </div>
     </div> 
   </div>
   <script type='text/javascript'>
