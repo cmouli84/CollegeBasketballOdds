@@ -638,7 +638,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 
 		for (Event event: events)
 		{
-			teamRecords.put(event.getAway_team().getFull_name(), new TeamRecord() {{ setEvents(new ArrayList<>());}});
+			teamRecords.put(event.getHome_team().getFull_name(), new TeamRecord() {{ setEvents(new ArrayList<>());}});
 			teamRecords.put(event.getAway_team().getFull_name(), new TeamRecord() {{ setEvents(new ArrayList<>());}});
 		}
 		

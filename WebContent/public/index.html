@@ -28,7 +28,7 @@
    	  }
       
       $scope.getWestGatePointSpread = function(westGatePointSpread) {
-    	  return (westGatePointSpread === -999999) ? "Not Available" : westGatePointSpread;
+    	  return (westGatePointSpread === -999999) ? "N/A" : westGatePointSpread;
       }
       
       $scope.getSonnyMoorePowerRanking  = function(pick) {
@@ -107,7 +107,7 @@
     		  if (event.homeScore > event.awayScore) result += "W ";
     		  else if (event.homeScore < event.awayScore) result += "L ";
     		  else result += "T ";
-    		  result += "(" + event.homeScore + " - " + event.awayScore + ")";
+    		  result += "(" + (event.homeScore === -999999 ? "N/A" : event.homeScore) + " - " + (event.awayScore === -999999 ? "N/A" : event.awayScore) + ")";
     		  return result;
     	  }
     	  if (event.eventAtHome === false)
@@ -115,10 +115,14 @@
     		  if (event.homeScore < event.awayScore) result += "W ";
     		  else if (event.homeScore > event.awayScore) result += "L ";
     		  else result += "T ";
-    		  result += "(" + event.awayScore + " - " + event.homeScore + ")";
+    		  result += "(" + (event.awayScore === -999999 ? "N/A" : event.awayScore) + " - " + (event.homeScore === -999999 ? "N/A" : event.homeScore) + ")";
     		  return result;
     	  }
     	  return "N/A";
+      }
+      
+      $scope.expandRow = function(pick) {
+    	  pick.expanded = !pick.expanded;
       }
 
       
@@ -188,6 +192,10 @@
     background-color:#FF0039;
     color:#fff;
 }
+.expandedRow {
+    background-color:#fff;
+    color:#000;
+}
 .oddRow {
     background-color:#F9F9F9;
 }
@@ -220,7 +228,7 @@
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><strong>Rating Diff (A-H)</strong></div>
         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><strong>Score (Home-Away)</strong></div>
       </div>
-      <div class="row divTableRow" ng-class-odd="getSonnyMooreStatusClass(pick) || 'oddRow'" ng-class-even="getSonnyMooreStatusClass(pick) || ''" ng-repeat="pick in picks">
+      <div class="row divTableRow" style="cursor:pointer" ng-class-odd="getSonnyMooreStatusClass(pick) || 'oddRow'" ng-class-even="getSonnyMooreStatusClass(pick) || ''" ng-click="expandRow(pick)" ng-repeat="pick in picks">
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
           <div class="small">{{pick.gameDate}}</div>
           <div>
@@ -238,45 +246,43 @@
         <div class="parent col-lg-2 col-md-2 col-sm-2 col-xs-2">
           {{getSonnyMooreOdds(pick)}}
         </div>
-        <div class="parent col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><br />
           {{getSonnyMoorePowerRanking(pick)}}
         </div>
         <div class="parent col-lg-2 col-md-2 col-sm-2 col-xs-2">
           {{getGameScore(pick)}}
         </div>
-        <div class="row" ng-if="pick.homeRecord != null || pick.awayRecord != null">
+        <div class="expandedRow col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-hide="(pick.homeRecord == null && pick.awayRecord == null) || !pick.expanded ">
            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" ng-if="pick.homeRecord != null">
             <div>
-              <div class="divTableRow">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" align="center">
-          	      <strong>{{pick.homeTeamName}}</strong>
-        	    </div>
-              </div>
-              <div class="divTableRow" ng-if="pick.homeRecord.events.length > 0">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+              <div class="divTableRow col-lg-12 col-md-12 col-sm-12 col-xs-12" align="center">
+        	    <strong>{{pick.homeTeamName}}</strong>
+        	  </div>
+              <div ng-if="pick.homeRecord.events.length > 0">
+                <div class="divTableRow col-lg-4 col-md-4 col-sm-4 col-xs-4">
             	  <strong>Opponent</strong>
             	</div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <div class="divTableRow col-lg-2 col-md-2 col-sm-2 col-xs-2">
         	      <strong>H/A</strong>
           	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      <strong>Odds</strong>
         	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      <strong>Result</strong>
         	    </div>
               </div>
-              <div class="divTableRow" ng-repeat="event in pick.homeRecord.events">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+              <div ng-repeat="event in pick.homeRecord.events">
+                <div class="divTableRow col-lg-4 col-md-4 col-sm-4 col-xs-4">
         	      {{event.opponentTeamName}}
         	    </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <div class="divTableRow col-lg-2 col-md-2 col-sm-2 col-xs-2">
         	      {{getHomeOrAway(event)}}
         	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      {{getWestGatePointSpread(event.homeOdds)}}
         	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      {{getResult(event)}}
         	    </div>
               </div>
@@ -284,42 +290,40 @@
           </div>
           <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" ng-if="pick.awayRecord != null">
             <div>
-              <div class="divTableRow">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" align="center">
-        	      <strong>{{pick.awayTeamName}}</strong>
-        	    </div>
-              </div>
-              <div class="divTableRow" ng-if="pick.homeRecord.events.length > 0">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+              <div class="divTableRow col-lg-12 col-md-12 col-sm-12 col-xs-12" align="center">
+      	        <strong>{{pick.awayTeamName}}</strong>
+        	  </div>
+              <div ng-if="pick.awayRecord.events.length > 0">
+                <div class="divTableRow col-lg-4 col-md-4 col-sm-4 col-xs-4">
         	      <strong>Opponent</strong>
         	    </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <div class="divTableRow col-lg-2 col-md-2 col-sm-2 col-xs-2">
         	      <strong>H/A</strong>
         	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      <strong>Odds</strong>
         	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      <strong>Result</strong>
         	    </div>
               </div>
-              <div class="divTableRow" ng-repeat="event in pick.homeRecord.events">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+              <div ng-repeat="event in pick.awayRecord.events">
+                <div class="divTableRow col-lg-4 col-md-4 col-sm-4 col-xs-4">
         	      {{event.opponentTeamName}}
         	    </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <div class="divTableRow col-lg-2 col-md-2 col-sm-2 col-xs-2">
         	      {{getHomeOrAway(event)}}
         	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      {{getWestGatePointSpread(event.homeOdds)}}
         	    </div>
-                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <div class="divTableRow col-lg-3 col-md-3 col-sm-3 col-xs-3">
         	      {{getResult(event)}}
         	    </div>
               </div>
-            </div> 
+            </div>
+          </div> 
         </div>
-      </div>
     </div> 
   </div>
   <script type='text/javascript'>
