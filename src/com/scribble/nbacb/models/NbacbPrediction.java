@@ -8,17 +8,23 @@ import java.util.Locale;
 public class NbacbPrediction implements Comparable<NbacbPrediction> {
 
 	private String homeTeamName;
+	private String homeTeamLogoUrl;
 	private String awayTeamName;
+	private String awayTeamLogoUrl;
 	private Integer homeWins;
 	private Integer homeLoses;
 	private Integer awayWins;
 	private Integer awayLoses;
 	private Double westgateCurrentPointSpread;
 	private Double westgateOpeningPointSpread;
+	private Double homeTeamSonnyMoorePowerRanking;
+	private Double awayTeamSonnyMoorePowerRanking;
 	private Double sonnyMoorePointSpread;
 	private String gameDate;
 	private Integer homeScore;
 	private Integer awayScore;
+	private TeamRecord homeRecord;
+	private TeamRecord awayRecord;
 	/**
 	 * @return the homeTeamName
 	 */
@@ -175,6 +181,78 @@ public class NbacbPrediction implements Comparable<NbacbPrediction> {
 	 */
 	public void setAwayScore(Integer awayScore) {
 		this.awayScore = awayScore;
+	}
+	/**
+	 * @return the homeRecord
+	 */
+	public TeamRecord getHomeRecord() {
+		return homeRecord;
+	}
+	/**
+	 * @param homeRecord the homeRecord to set
+	 */
+	public void setHomeRecord(TeamRecord homeRecord) {
+		this.homeRecord = homeRecord;
+	}
+	/**
+	 * @return the awayRecord
+	 */
+	public TeamRecord getAwayRecord() {
+		return awayRecord;
+	}
+	/**
+	 * @param awayRecord the awayRecord to set
+	 */
+	public void setAwayRecord(TeamRecord awayRecord) {
+		this.awayRecord = awayRecord;
+	}
+	/**
+	 * @return the homeTeamSonnyMoorePowerRanking
+	 */
+	public Double getHomeTeamSonnyMoorePowerRanking() {
+		return homeTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @param homeTeamSonnyMoorePowerRanking the homeTeamSonnyMoorePowerRanking to set
+	 */
+	public void setHomeTeamSonnyMoorePowerRanking(Double homeTeamSonnyMoorePowerRanking) {
+		this.homeTeamSonnyMoorePowerRanking = homeTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @return the awayTeamSonnyMoorePowerRanking
+	 */
+	public Double getAwayTeamSonnyMoorePowerRanking() {
+		return awayTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @param awayTeamSonnyMoorePowerRanking the awayTeamSonnyMoorePowerRanking to set
+	 */
+	public void setAwayTeamSonnyMoorePowerRanking(Double awayTeamSonnyMoorePowerRanking) {
+		this.awayTeamSonnyMoorePowerRanking = awayTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @return the homeTeamLogoUrl
+	 */
+	public String getHomeTeamLogoUrl() {
+		return homeTeamLogoUrl;
+	}
+	/**
+	 * @param homeTeamLogoUrl the homeTeamLogoUrl to set
+	 */
+	public void setHomeTeamLogoUrl(String homeTeamLogoUrl) {
+		this.homeTeamLogoUrl = homeTeamLogoUrl;
+	}
+	/**
+	 * @return the awayTeamLogoUrl
+	 */
+	public String getAwayTeamLogoUrl() {
+		return awayTeamLogoUrl;
+	}
+	/**
+	 * @param awayTeamLogoUrl the awayTeamLogoUrl to set
+	 */
+	public void setAwayTeamLogoUrl(String awayTeamLogoUrl) {
+		this.awayTeamLogoUrl = awayTeamLogoUrl;
 	}
 
 	

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.scribble.nbacb.models.EventPowerRanking;
 import com.scribble.nbacb.models.PowerRanking;
+import com.scribble.nbacb.models.TeamRecord;
 import com.scribble.nbacb.models.events.Event;
 import com.scribble.nbacb.models.schedule.Season;
 import com.scribble.nbacb.models.standings.Standing;
@@ -18,7 +19,8 @@ public interface ICollegeBasketBallOddsRepository {
 		
 	Season getSchedule() throws MalformedURLException, IOException;
 
-	List<Event> getEventsByDate(Date eventDate, Season season, Boolean isPastEventDate) throws MalformedURLException, IOException;
+
+	List<Event> getEventsByDate(Date eventDate, Season season) throws MalformedURLException, IOException;
 
 	List<Standing> getTeamStandings() throws MalformedURLException, IOException;
 	
@@ -27,4 +29,6 @@ public interface ICollegeBasketBallOddsRepository {
 	List<EventPowerRanking> getSonnyMooreEventsByDate(Date matchDate, List<Event> events) throws ParseException, UnknownHostException;
 	
 	Map<String, String> getScoreApiAndSonnyMooreTeamMapping();
+
+	Map<String, TeamRecord> getTeamRecords(Date matchDate, List<Event> events) throws UnknownHostException;
 }

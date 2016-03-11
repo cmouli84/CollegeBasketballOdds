@@ -25,12 +25,31 @@
     		  date: eventDate,
     		  selected: (i === 10)
     	  });
+          if (i===10)
+          {
+        	  $scope.currentDate = $filter('date')(eventDate, "yyyy-MM-dd");
+        	  $scope.selectedDate = $filter('date')(eventDate, "yyyy-MM-dd");
+          }
    	  }
       
       $scope.getWestGatePointSpread = function(westGatePointSpread) {
-    	  return (westGatePointSpread === -999999) ? "Not Available" : westGatePointSpread;
+    	  return (westGatePointSpread === -999999) ? "N/A" : westGatePointSpread;
       }
       
+      $scope.getSonnyMooreRatingDiff  = function(pick) {
+    	  return ((pick.homeTeamSonnyMoorePowerRanking === -999999 || pick.awayTeamSonnyMoorePowerRanking === -999999) 
+    	  		? "N/A" 
+    	  		: Math.round((pick.awayTeamSonnyMoorePowerRanking - pick.homeTeamSonnyMoorePowerRanking) * 100.0)/100.0);
+      }
+      
+      $scope.getSonnyMoorePowerRanking  = function(pick) {
+    	  return "("
+    	  		+ (pick.awayTeamSonnyMoorePowerRanking === -999999 ? "N/A" : pick.awayTeamSonnyMoorePowerRanking)
+    	  		+ " - "
+    	  		+ (pick.homeTeamSonnyMoorePowerRanking === -999999 ? "N/A" : pick.homeTeamSonnyMoorePowerRanking)
+    	  		+ ")";
+      }
+
       $scope.getGameScore = function(pick) {
     	  return (pick.homeScore === -999999) ? "Not Started" : pick.homeScore + "-" + pick.awayScore;
       }
@@ -38,13 +57,21 @@
       $scope.getSonnyMooreOdds = function(pick) {
     	  return (pick.sonnyMoorePointSpread === -999999) ? "Not Available" : pick.sonnyMoorePointSpread;
       }
+      
+      $scope.getGameRowClass = function() {
+    	  return ($scope.currentDate == $scope.selectedDate) ? "pointerRow " : "";
+      }
+      
+      $scope.getExpandClass = function(pick) {
+    	  return (pick.expanded ? " customicon-minus" : " customicon-plus") + (($scope.currentDate == $scope.selectedDate) ? "" : " customicon-hide");
+      }
 
       $scope.getSonnyMooreStatusClass = function(pick) {
     	  if (pick.sonnyMoorePointSpread === -999999 || pick.westgateCurrentPointSpread === -999999)
    		  {
     		  return "";
    		  }
-    	  
+
     	  var dtCurrentDate = new Date();
     	  var dtGameDate = new Date(pick.gameDate);
     	  dtGameDate.setFullYear((dtGameDate.getMonth()>6 && dtCurrentDate.getMonth()>6) || (dtGameDate.getMonth()<=6 && dtCurrentDate.getMonth()<=6) 
@@ -55,10 +82,24 @@
     		  if ((((pick.awayScore - pick.homeScore) > pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread > pick.westgateCurrentPointSpread)) 
     				  || (((pick.awayScore - pick.homeScore) < pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread < pick.westgateCurrentPointSpread))) 
    			  {
-   			  		return "success";
+   			  		return "positive";
    			  }
-			  return "danger";
+			  return "negative";
    		  }
+    	  
+		  return "";
+      }
+      
+      $scope.getWestGateSpreadStatusClass = function(pick) {
+    	  if (pick.westgateCurrentPointSpread === -999999 || pick.awayScore === 0 || pick.homeScore === 0)
+    	  {
+    		  return "";
+    	  }
+    	  
+    	  if (pick.westgateCurrentPointSpread === (pick.awayScore - pick.homeScore))
+    	  {
+    		  return "tieRow";
+    	  }
     	  
     	  return "";
       }
@@ -67,12 +108,52 @@
           $http.get('/api/nbacb/' + $filter('date')(event.date, "yyyy-MM-dd"))
           .then(function(res){
              $scope.picks = res.data;
+         	 $scope.selectedDate = $filter('date')(event.date, "yyyy-MM-dd");
              
              angular.forEach($scope.eventDates, function(value, key) {
             	  value.selected = (value.date == event.date);
             	});
            });
       }
+      
+
+      $scope.getHomeOrAway = function(event) {
+    	  if (event.eventAtHome === true)
+    	  {
+    		  return "H";
+    	  }
+    	  if (event.eventAtHome === false)
+    	  {
+    		  return "A";
+    	  }
+    	  return "N/A";
+      }
+
+      $scope.getResult = function(event) {
+    	  var result = "";
+    	  if (event.eventAtHome === true)
+    	  {
+    		  if (event.homeScore > event.awayScore) result += "W ";
+    		  else if (event.homeScore < event.awayScore) result += "L ";
+    		  else result += "T ";
+    		  result += "(" + (event.homeScore === -999999 ? "N/A" : event.homeScore) + " - " + (event.awayScore === -999999 ? "N/A" : event.awayScore) + ")";
+    		  return result;
+    	  }
+    	  if (event.eventAtHome === false)
+    	  {
+    		  if (event.homeScore < event.awayScore) result += "W ";
+    		  else if (event.homeScore > event.awayScore) result += "L ";
+    		  else result += "T ";
+    		  result += "(" + (event.awayScore === -999999 ? "N/A" : event.awayScore) + " - " + (event.homeScore === -999999 ? "N/A" : event.homeScore) + ")";
+    		  return result;
+    	  }
+    	  return "N/A";
+      }
+      
+      $scope.expandRow = function(pick) {
+    	  pick.expanded = !pick.expanded;
+      }
+
       
     });
 
@@ -128,11 +209,59 @@
 .scroller-left {
   float:left;
 }
+
+.pointerRow
+{
+	cursor:pointer
+}
+
+.tieRow {
+    background-color: #428BCA;
+    color:#fff;
+}
+.positive {
+    background-color:#3FB618;
+    color:#fff;
+}
+.negative {
+    background-color:#FF0039;
+    color:#fff;
+}
+.expandedRow {
+    background-color:#fff;
+    color:#000;
+}
+.oddRow {
+    background-color:#F9F9F9;
+}
+.divTableRow {
+    border-bottom-style: solid; 
+    border-bottom-width: 1px; 
+    border-bottom-color: #dddddd;
+}
+.divPadding {
+    padding: 8px 5px 8px 5px; 
+}
+.customicon {
+    font-weight: bold;
+}
+.customicon-plus:before {
+    content: "\2b";
+}
+.customicon-minus:before {
+    content: "\2212";
+}
+.customicon-hide {
+	opacity: 0;
+}
+.text-centeralign {
+	text-align: center
+}
   </style>
 </head>
 <body>
-  <div class="container-fluid" ng-controller="NbacbCtrl">  
-    <div class="container-fluid">
+  <div ng-controller="NbacbCtrl">  
+    <div class="container">
       <div class="scroller scroller-left"><i class="glyphicon glyphicon-chevron-left"></i></div>
       <div class="scroller scroller-right"><i class="glyphicon glyphicon-chevron-right"></i></div>
       <div class="wrapper">
@@ -143,27 +272,104 @@
       </ul>
       </div>
     </div>
-    <div class="container">
-      <table class="table table-striped col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <thead>
-          <tr>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Match</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Home Team<br>Wins-Loses</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Away Team<br>Wins-Loses</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Westgate Odds</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Sonny Moore Odds</th>
-            <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Score<br />Home-Away</th>
-          </tr>
-        </thead>
-        <tr ng-class="getSonnyMooreStatusClass(pick)" ng-repeat="pick in picks">
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2"><div class="small">{{pick.gameDate}}</div><strong>{{pick.awayTeamName}}<br>@{{pick.homeTeamName}}</strong></td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.homeWins}}-{{pick.homeLoses}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{pick.awayWins}}-{{pick.awayLoses}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getSonnyMooreOdds(pick)}}</td>
-          <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="vertical-align:middle">{{getGameScore(pick)}}</td>
-        </tr>
-      </table>
+    <div class="container" style="font-size: 16px">
+      <div class="row divTableRow divPadding">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"><strong>Match</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign"><strong>Westgate Odds</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign"><strong>Sonny Moore Odds</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign"><strong>Rating Diff (A-H)</strong></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign"><strong>Score (Home-Away)</strong></div>
+      </div>
+      <div class="row divTableRow" ng-class-odd="getGameRowClass() + 'oddRow'" ng-class-even="getGameRowClass()" ng-click="expandRow(pick)" ng-repeat="pick in picks">
+        <div class="divPadding col-lg-4 col-md-4 col-sm-4 col-xs-4" style="padding-top: 4px">
+          <div>
+            <span class="customicon customicon-plus customicon-hide"></span>
+            <small>{{pick.gameDate}}</small>
+          </div>
+          <div>
+            <span class="customicon" ng-class="getExpandClass(pick)"></span>
+          	<image ng-src="{{pick.awayTeamLogoUrl}}" />
+            <strong>{{pick.awayTeamName}} </strong>
+            <small>({{pick.awayWins}}-{{pick.awayLoses}})</small>
+          </div>
+          <div>
+            <span class="customicon customicon-plus customicon-hide"></span>
+          	<image ng-src="{{pick.homeTeamLogoUrl}}" />
+           	<strong>@{{pick.homeTeamName}} </strong> 
+            <small>({{pick.homeWins}}-{{pick.homeLoses}})</small>
+          </div>
+        </div>
+        <div class="divPadding col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign" ng-class="getWestGateSpreadStatusClass(pick)"><br />
+          {{getWestGatePointSpread(pick.westgateCurrentPointSpread)}}<br />&nbsp;
+        </div>
+        <div class="divPadding col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign"><br />
+          {{getSonnyMooreOdds(pick)}}
+        </div>
+        <div class="divPadding col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign" ng-class="getSonnyMooreStatusClass(pick)">
+          <div style="line-height: 11px">&nbsp;</div>
+          {{getSonnyMooreRatingDiff(pick)}}<br />{{getSonnyMoorePowerRanking(pick)}}
+          <div style="line-height: 11px">&nbsp;</div>
+        </div>
+        <div class="divPadding col-lg-2 col-md-2 col-sm-2 col-xs-2 text-centeralign"><br />
+          {{getGameScore(pick)}}
+        </div>
+        <div class="expandedRow col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-hide="(pick.homeRecord == null && pick.awayRecord == null) || !pick.expanded ">
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" ng-if="pick.homeRecord != null">
+            <table class="table">
+              <tr>
+                <th colspan="4" style="text-align: center; border-top: 0px"><image ng-src="{{pick.homeTeamLogoUrl}}" />{{pick.homeTeamName}}</th>
+        	  </tr>
+              <tr ng-if="pick.homeRecord.events.length > 0">
+                <th class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Opponent</th>
+                <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">H/A</th>
+                <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Odds</th>
+                <th class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Result</th>
+              </tr>
+              <tr ng-repeat="event in pick.homeRecord.events">
+                <td class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        	      {{event.opponentTeamName}}
+        	    </td>
+                <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        	      {{getHomeOrAway(event)}}
+        	    </td>
+                <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        	      {{getWestGatePointSpread(event.homeOdds)}}
+        	    </td>
+                <td class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        	      {{getResult(event)}}
+        	    </td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" ng-if="pick.awayRecord != null">
+            <table class="table">
+              <tr>
+                <th colspan="4" style="text-align: center; border-top: 0px"><image ng-src="{{pick.awayTeamLogoUrl}}" />{{pick.awayTeamName}}</th>
+        	  </tr>
+              <tr ng-if="pick.awayRecord.events.length > 0">
+                <th class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Opponent</th>
+                <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">H/A</th>
+                <th class="col-lg-2 col-md-2 col-sm-2 col-xs-2">Odds</th>
+                <th class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Result</th>
+              </tr>
+              <tr ng-repeat="event in pick.awayRecord.events">
+                <td class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        	      {{event.opponentTeamName}}
+        	    </td>
+                <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        	      {{getHomeOrAway(event)}}
+        	    </td>
+                <td class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        	      {{getWestGatePointSpread(event.homeOdds)}}
+        	    </td>
+                <td class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        	      {{getResult(event)}}
+        	    </td>
+              </tr>
+              </table>
+            </div>
+          </div> 
+        </div>
     </div> 
   </div>
   <script type='text/javascript'>
