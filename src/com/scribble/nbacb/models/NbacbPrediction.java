@@ -8,7 +8,9 @@ import java.util.Locale;
 public class NbacbPrediction implements Comparable<NbacbPrediction> {
 
 	private String homeTeamName;
+	private String homeTeamLogoUrl;
 	private String awayTeamName;
+	private String awayTeamLogoUrl;
 	private Integer homeWins;
 	private Integer homeLoses;
 	private Integer awayWins;
@@ -227,6 +229,30 @@ public class NbacbPrediction implements Comparable<NbacbPrediction> {
 	 */
 	public void setAwayTeamSonnyMoorePowerRanking(Double awayTeamSonnyMoorePowerRanking) {
 		this.awayTeamSonnyMoorePowerRanking = awayTeamSonnyMoorePowerRanking;
+	}
+	/**
+	 * @return the homeTeamLogoUrl
+	 */
+	public String getHomeTeamLogoUrl() {
+		return homeTeamLogoUrl;
+	}
+	/**
+	 * @param homeTeamLogoUrl the homeTeamLogoUrl to set
+	 */
+	public void setHomeTeamLogoUrl(String homeTeamLogoUrl) {
+		this.homeTeamLogoUrl = homeTeamLogoUrl;
+	}
+	/**
+	 * @return the awayTeamLogoUrl
+	 */
+	public String getAwayTeamLogoUrl() {
+		return awayTeamLogoUrl;
+	}
+	/**
+	 * @param awayTeamLogoUrl the awayTeamLogoUrl to set
+	 */
+	public void setAwayTeamLogoUrl(String awayTeamLogoUrl) {
+		this.awayTeamLogoUrl = awayTeamLogoUrl;
 	}
 
 	

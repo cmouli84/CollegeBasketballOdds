@@ -106,7 +106,9 @@ public class CollegeBasketBallOddsService {
 			
 			nbacbPredictions.add(new NbacbPrediction() {{
 				setHomeTeamName(scoreApiHomeTeamName);
+				setHomeTeamLogoUrl(event.getHome_team().getLogos().getTiny());
 				setAwayTeamName(scoreApiAwayTeamName);
+				setAwayTeamLogoUrl(event.getAway_team().getLogos().getTiny());
 				setHomeWins(homeTeamRanking == null ? 0 : homeTeamRanking.getWins());
 				setHomeLoses(homeTeamRanking == null ? 0 : homeTeamRanking.getLoses());
 				setAwayWins(awayTeamRanking == null ? 0 : awayTeamRanking.getWins());
