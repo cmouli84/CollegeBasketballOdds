@@ -67,8 +67,8 @@
       }
 
       $scope.getSonnyMooreStatusClass = function(pick) {
-    	  var sonnyMooreRatingDiff = getSonnyMooreRatingDiff(pick);
-    	  if (sonnyMooreRatingDiff === -999999 || pick.westgateCurrentPointSpread === -999999)
+    	  var sonnyMooreRatingDiff = $scope.getSonnyMooreRatingDiff(pick);
+    	  if (sonnyMooreRatingDiff === "N/A" || pick.westgateCurrentPointSpread === -999999)
    		  {
     		  return "";
    		  }
