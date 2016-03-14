@@ -67,7 +67,8 @@
       }
 
       $scope.getSonnyMooreStatusClass = function(pick) {
-    	  if (pick.sonnyMoorePointSpread === -999999 || pick.westgateCurrentPointSpread === -999999)
+    	  var sonnyMooreRatingDiff = getSonnyMooreRatingDiff(pick);
+    	  if (sonnyMooreRatingDiff === -999999 || pick.westgateCurrentPointSpread === -999999)
    		  {
     		  return "";
    		  }
@@ -79,8 +80,8 @@
     	  dtGameDate.setHours(dtGameDate.getHours() + 3);
     	  if (dtGameDate < dtCurrentDate)
    		  {
-    		  if ((((pick.awayScore - pick.homeScore) > pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread > pick.westgateCurrentPointSpread)) 
-    				  || (((pick.awayScore - pick.homeScore) < pick.westgateCurrentPointSpread) && (pick.sonnyMoorePointSpread < pick.westgateCurrentPointSpread))) 
+    		  if ((((pick.awayScore - pick.homeScore) > pick.westgateCurrentPointSpread) && (sonnyMooreRatingDiff > pick.westgateCurrentPointSpread)) 
+    				  || (((pick.awayScore - pick.homeScore) < pick.westgateCurrentPointSpread) && (sonnyMooreRatingDiff < pick.westgateCurrentPointSpread))) 
    			  {
    			  		return "positive";
    			  }
