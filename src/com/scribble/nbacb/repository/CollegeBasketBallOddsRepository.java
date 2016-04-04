@@ -585,7 +585,16 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		
 		if ((eventIdList != null) && (eventIdList.size() > 0))
 		{
-			String eventIds = String.join(",", Arrays.toString(eventIdList.toArray()));
+			String eventIds;
+			if (eventIdList.size() != 1)
+			{
+				eventIds = String.join(",", Arrays.toString(eventIdList.toArray()));
+			}
+			else
+			{
+				eventIds = eventIdList.get(0).toString();
+			}
+			
 			String eventsUrl = String.format(eventsUrlFormat, URLEncoder.encode(eventIds, "utf-8"));
 			
 			String eventsResponse = getWebResponse(eventsUrl);
