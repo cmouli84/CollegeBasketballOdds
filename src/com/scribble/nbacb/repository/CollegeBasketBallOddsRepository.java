@@ -48,7 +48,7 @@ import com.scribble.nbacb.models.standings.Standing;
 public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRepository {
 
 	public Season getSchedule() throws MalformedURLException, IOException {
-		String scheduleUrl = "http://api.thescore.com/ncaab/schedule";
+		String scheduleUrl = "http://api.thescore.com/nfl/schedule";
 		ObjectMapper mapper = new ObjectMapper();
 		
 		String scheduleResponse = getWebResponse(scheduleUrl);
@@ -570,7 +570,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 	
 	private List<Event> getMatchesByDate(String matchDate, String matchNextDate, Season season) throws MalformedURLException, IOException
 	{
-		String eventsUrlFormat = "http://api.thescore.com/ncaab/events?id.in=%s";
+		String eventsUrlFormat = "http://api.thescore.com/nfl/events?id.in=%s";
 		List<Event> matches = new ArrayList<>();
 		ObjectMapper mapper = new ObjectMapper();
 		List<Integer> eventIdList = new ArrayList<>();
