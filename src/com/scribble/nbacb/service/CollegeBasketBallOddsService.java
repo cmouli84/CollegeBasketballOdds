@@ -54,8 +54,7 @@ public class CollegeBasketBallOddsService {
 		
 		Map<String, TeamRecord> teamRecords = nbacbRepository.getTeamRecords(matchDate, events);
 		
-		Map<String, String> teamMappings = nbacbRepository.getScoreApiAndSonnyMooreTeamMapping();
-		
+		//Map<String, String> teamMappings = nbacbRepository.getScoreApiAndSonnyMooreTeamMapping();
 		for (Event event: events)
 		{
 			DateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
@@ -73,10 +72,8 @@ public class CollegeBasketBallOddsService {
 			//Standing homeTeamStanding = getTeamStanding(scoreApiHomeTeamName, standings);
 			//Standing awayTeamStanding = getTeamStanding(scoreApiAwayTeamName, standings);
 			
-			PowerRanking homeTeamRanking = teamMappings.get(scoreApiHomeTeamName) == null 
-					? null : getMatchingTeamName(powerRankings, teamMappings.get(scoreApiHomeTeamName));
-			PowerRanking awayTeamRanking = teamMappings.get(scoreApiAwayTeamName) == null 
-					? null : getMatchingTeamName(powerRankings, teamMappings.get(scoreApiAwayTeamName));
+			PowerRanking homeTeamRanking = getMatchingTeamName(powerRankings, scoreApiHomeTeamName.toUpperCase());
+			PowerRanking awayTeamRanking = getMatchingTeamName(powerRankings, scoreApiAwayTeamName.toUpperCase());
 			Double sonnyMooreOdds;
 			Double homeTeamSonnyMooreRanking;
 			Double awayTeamSonnyMooreRanking;
@@ -87,7 +84,7 @@ public class CollegeBasketBallOddsService {
 				awayTeamSonnyMooreRanking = (eventPowerRanking == null || eventPowerRanking.getAwayTeamRanking() == 0) ? -999999 : eventPowerRanking.getAwayTeamRanking();
 				sonnyMooreOdds = (eventPowerRanking == null || eventPowerRanking.getHomeTeamRanking() == 0 || eventPowerRanking.getAwayTeamRanking() == 0) 
 						? -999999
-						: Math.round((eventPowerRanking.getAwayTeamRanking() - eventPowerRanking.getHomeTeamRanking() - 3.25) * 100.0) / 100.0;
+						: Math.round((eventPowerRanking.getAwayTeamRanking() - eventPowerRanking.getHomeTeamRanking() - 2.00) * 100.0) / 100.0;
 			}
 			else
 			{	
@@ -95,7 +92,7 @@ public class CollegeBasketBallOddsService {
 				awayTeamSonnyMooreRanking = (awayTeamRanking == null || awayTeamRanking.getPowerRanking() == 0) ? -999999 : awayTeamRanking.getPowerRanking();
 				sonnyMooreOdds = (homeTeamRanking == null || awayTeamRanking == null || homeTeamRanking.getPowerRanking() == 0 || awayTeamRanking.getPowerRanking() == 0) 
 						? -999999
-						: Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 3.25) * 100.0) / 100.0;
+						: Math.round((awayTeamRanking.getPowerRanking() - homeTeamRanking.getPowerRanking() - 2.00) * 100.0) / 100.0;
 			}
 			
 			Double currentOdd = event.getOdd() == null || event.getOdd().getHome_odd().startsWith("pk") || event.getOdd().getHome_odd().startsWith("N") 

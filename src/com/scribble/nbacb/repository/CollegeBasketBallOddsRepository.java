@@ -10,6 +10,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,11 +60,19 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 	public List<Event> getEventsByDate(Date eventDate, Season season) throws MalformedURLException, IOException
 	{
 		List<Event> matches = new ArrayList<>();
-		Calendar toDateCalendar = Calendar.getInstance();
+		/*Calendar toDateCalendar = Calendar.getInstance();
 		toDateCalendar.setTime(eventDate);
-		toDateCalendar.add(Calendar.HOUR, 24);
-		List<Event> eventDayMatches = getMatchesByDate(new SimpleDateFormat("yyyy-MM-dd").format(eventDate),
-				new SimpleDateFormat("yyyy-MM-dd").format(toDateCalendar.getTime()), season);
+		toDateCalendar.add(Calendar.HOUR, 24);*/
+		List<Event> eventDayMatches = new ArrayList<>();
+//			eventDayMatches = getMatchesByDate(new SimpleDateFormat("yyyy-MM-dd").format(eventDate),
+//					new SimpleDateFormat("yyyy-MM-dd").format(toDateCalendar.getTime()), season);
+		
+		try {
+			eventDayMatches = getMatchesByDate(eventDate, season);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		for (Event event: eventDayMatches)
 		{
@@ -75,7 +84,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 	
 	public List<Standing> getTeamStandings() throws MalformedURLException, IOException
 	{
-		String standingsUrl = "http://api.thescore.com/ncaab/standings";
+		String standingsUrl = "http://api.thescore.com/nfl/standings";
 		ObjectMapper mapper = new ObjectMapper();
 		
 		String standingsResponse = getWebResponse(standingsUrl);
@@ -86,7 +95,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 
 	public List<PowerRanking> getSonnyMoorePowerRaking() throws MalformedURLException, IOException
 	{
-		String url = "http://sonnymoorepowerratings.com/m-basket.htm";
+		String url = "http://sonnymoorepowerratings.com/nfl-foot.htm";
 		
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -111,7 +120,8 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 			{
 				content = content.trim();
 
-				if (contentStarted && content.equals("<BR>"))
+				//if (contentStarted && content.equals("<BR>"))
+				if (contentStarted && content.equals("</H3>"))
 				{
 					break;
 				}
@@ -166,7 +176,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 
 		DynamoDB dynamoDb = getDynamoDbInstance();
 
-        Table teams = dynamoDb.getTable("Events");
+        Table teams = dynamoDb.getTable("NflEvents");
 
     	System.out.println("Event Count : " + events.size());
 
@@ -568,7 +578,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		return dictionary;
 	}
 	
-	private List<Event> getMatchesByDate(String matchDate, String matchNextDate, Season season) throws MalformedURLException, IOException
+	private List<Event> getMatchesByDate(Date matchDate, Season season) throws MalformedURLException, IOException, ParseException
 	{
 		String eventsUrlFormat = "http://api.thescore.com/nfl/events?id.in=%s";
 		List<Event> matches = new ArrayList<>();
@@ -577,8 +587,13 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		
 		for (Current_season currSeason: season.getCurrent_season())
 		{
-			if (currSeason.getId().equals(matchDate) || currSeason.getId().equals(matchNextDate))
+			/*if (currSeason.getId().equals(matchDate) || currSeason.getId().equals(matchNextDate))
 			{
+				eventIdList.addAll(currSeason.getEvent_ids());
+			}*/
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'+00:00'");
+			if (dateFormat.parse(currSeason.getStart_date()).before(matchDate) 
+					&& dateFormat.parse(currSeason.getEnd_date()).after(matchDate)) {
 				eventIdList.addAll(currSeason.getEvent_ids());
 			}
 		}
@@ -588,7 +603,10 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 			String eventIds;
 			if (eventIdList.size() != 1)
 			{
-				eventIds = String.join(",", Arrays.toString(eventIdList.toArray()));
+				eventIds = String.join(",", Arrays.toString(eventIdList.toArray()))
+						.replaceAll("\\[*", "")
+						.replaceAll("\\]*", "")
+						.replaceAll("\\ *", "");
 			}
 			else
 			{
@@ -597,12 +615,15 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 			
 			String eventsUrl = String.format(eventsUrlFormat, URLEncoder.encode(eventIds, "utf-8"));
 			
+			System.out.println(URLEncoder.encode(eventIds, "utf-8"));
+			System.out.println(eventIds);
+			
 			String eventsResponse = getWebResponse(eventsUrl);
 			matches = Arrays.asList(mapper.readValue(eventsResponse, Event[].class));
 		}
 		
 		return matches;
-	}	
+	}
 
 	private String getWebResponse(String url) throws MalformedURLException, IOException, ProtocolException {
 		URL obj = new URL(url);
@@ -642,7 +663,7 @@ public class CollegeBasketBallOddsRepository implements ICollegeBasketBallOddsRe
 		Map<String, TeamRecord> teamRecords = new HashMap<>();
 
 		DynamoDB dynamoDb = getDynamoDbInstance();
-        Table eventsTable = dynamoDb.getTable("Events");
+        Table eventsTable = dynamoDb.getTable("NflEvents");
 
         ScanSpec spec = new ScanSpec();
 
